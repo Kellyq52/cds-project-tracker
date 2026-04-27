@@ -117,6 +117,7 @@ const Checklist = (function () {
   function render(tasks, taskMap, phaseAssignees, startDate, phases) {
     phaseAssignees = phaseAssignees || {};
     phases = phases || [];
+    const canEdit = Auth.can('editTasks');
     const tbody = document.getElementById('taskListBody');
     const empty = document.getElementById('checklistEmpty');
 
@@ -161,18 +162,18 @@ const Checklist = (function () {
             ondrop="Checklist.onPhaseDrop(event,'${esc(phase)}')"
             ondragend="Checklist.onPhaseDragEnd(event)">
           <td style="background:${colors.bg}; color:${colors.text}">
-            <span class="phase-drag-handle" title="Drag to reorder">&#8942;</span>
+            ${canEdit ? `<span class="phase-drag-handle" title="Drag to reorder">&#8942;</span>` : ''}
           </td>
           <td style="background:${colors.bg}; color:${colors.text}">
             <button class="phase-collapse-btn" onclick="Checklist.togglePhase('${esc(phase)}'); event.stopPropagation()" title="Collapse/expand phase">${collapsedPhases.has(phase) ? '&#9654;' : '&#9660;'}</button>
             <span class="phase-hdr-label">${esc(phase)}</span>
-            <button class="phase-remove-btn" onclick="App.removePhase('${esc(phase)}')" title="Remove phase">&times;</button>
+            ${canEdit ? `<button class="phase-remove-btn" onclick="App.removePhase('${esc(phase)}')" title="Remove phase">&times;</button>` : ''}
           </td>
           <td class="center" style="background:${colors.bg}; color:${colors.text}">
             ${phaseDurStr}
           </td>
           <td style="background:${colors.bg}; color:${colors.text}; padding:4px 8px;">
-            ${ ['Due Diligence','Permitting','Construction','Design'].includes(phase) ? (() => {
+            ${ canEdit && ['Due Diligence','Permitting','Construction','Design'].includes(phase) ? (() => {
               const PHASE_ROLE = { 'Due Diligence': 'project_manager', 'Permitting': 'property_developer', 'Construction': 'construction_manager', 'Design': 'consultant' };
               const allowedRole = PHASE_ROLE[phase];
               const roleUsers = (App.getUsers() || []).filter(u => {
@@ -221,45 +222,49 @@ const Checklist = (function () {
 
       return `
         <tr class="${isOverdue ? 'row-overdue' : ''}"
-            draggable="true"
+            ${canEdit ? `draggable="true"
             ondragstart="Checklist.onDragStart(event,'${task.id}')"
             ondragover="Checklist.onDragOver(event,'${task.id}')"
             ondragleave="Checklist.onDragLeave(event)"
             ondrop="Checklist.onDrop(event,'${task.id}')"
-            ondragend="Checklist.onDragEnd(event)">
+            ondragend="Checklist.onDragEnd(event)"` : ''}>
           <td class="drag-td">
-            <span class="drag-handle" title="Drag to reorder">&#8942;</span>
+            ${canEdit ? `<span class="drag-handle" title="Drag to reorder">&#8942;</span>` : ''}
             <input type="checkbox" class="task-check"
               ${task.status === 'complete' ? 'checked' : ''}
+              ${!canEdit ? 'disabled' : ''}
               onchange="App.toggleComplete('${task.id}', this.checked)">
           </td>
           <td class="task-name-cell ${task.status === 'complete' ? 'done' : ''}">${esc(task.name)}</td>
           <td class="center">
             <input type="number" class="inline-duration" min="1" value="${task.duration}"
+              ${!canEdit ? 'disabled' : ''}
               onchange="App.setDuration('${task.id}', this.value)"
               onclick="event.stopPropagation()">
           </td>
           <td>${esc(App.getUserName(task.assignee) || '\u2014')}</td>
           <td class="deps-cell">${depHtml}</td>
-          <td class="center">${task === firstOnboardingTask
+          <td class="center">${task === firstOnboardingTask && canEdit
             ? `<input type="date" class="inline-date start-date-input" value="${startDate || ''}" title="Project start date" onchange="App.setProjectStart(this.value)" onclick="event.stopPropagation()">`
             : fmtDate(task.plannedStart)}</td>
           <td class="center">
             <input type="date" class="inline-date ${isStartLate ? 'late' : isStartEarly ? 'early' : ''}"
               value="${task.actualStart || ''}"
+              ${!canEdit ? 'disabled' : ''}
               onchange="App.setActualStart('${task.id}', this.value)">
           </td>
           <td class="center">${fmtDate(plannedEnd)}</td>
           <td class="center">
             <input type="date" class="inline-date ${isLate ? 'late' : isEarly ? 'early' : ''}"
               value="${task.actualEnd || ''}"
+              ${!canEdit ? 'disabled' : ''}
               onchange="App.setActualEnd('${task.id}', this.value)">
           </td>
           <td class="center">
             <span class="badge ${badgeClass}">${fmtStatus(displayStatus)}</span>
           </td>
           <td>
-            <button class="btn-edit" onclick="App.openEditTask('${task.id}')">Edit</button>
+            ${canEdit ? `<button class="btn-edit" onclick="App.openEditTask('${task.id}')">Edit</button>` : ''}
           </td>
         </tr>`;
     }

@@ -315,10 +315,11 @@ const App = (function () {
     document.getElementById('summaryTabContent').classList.toggle('hidden', tab !== 'summary');
     document.getElementById('capacityTabContent').classList.toggle('hidden', tab !== 'capacity');
     // Show view toggle and task controls on both project and archive tabs
+    const canEdit = Auth.can('editTasks');
     document.getElementById('viewToggleGroup').classList.toggle('hidden', !isProjectLike);
-    document.getElementById('addTaskBtn').classList.toggle('hidden', !isProjectLike);
-    document.getElementById('addPhaseBtn').classList.toggle('hidden', !isProjectLike);
-    document.getElementById('loadTemplateBtn').classList.toggle('hidden', !isProjectLike);
+    document.getElementById('addTaskBtn').classList.toggle('hidden', !isProjectLike || !canEdit);
+    document.getElementById('addPhaseBtn').classList.toggle('hidden', !isProjectLike || !canEdit);
+    document.getElementById('loadTemplateBtn').classList.toggle('hidden', !isProjectLike || !canEdit);
     document.getElementById('btnRestoreProject').classList.toggle('hidden', tab !== 'archive');
     if (tab === 'summary')  renderSummaryView();
     if (tab === 'capacity') renderCapacityView();
@@ -1559,6 +1560,11 @@ const App = (function () {
     if (btn) btn.classList.toggle('hidden', !Auth.can('manageUsers'));
     const btnSave = document.getElementById('btnSaveData');
     if (btnSave) btnSave.classList.toggle('hidden', !Auth.can('manageUsers'));
+    const canEdit = Auth.can('editTasks');
+    ['addTaskBtn', 'addPhaseBtn', 'loadTemplateBtn'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.toggle('hidden', !canEdit);
+    });
 
     // Division access: only administrators and property_developers can see the PD division
     const canSeePD = roles.includes('administrator') || roles.includes('property_developer');
