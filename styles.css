@@ -832,32 +832,39 @@ body {
 
 /* Program column */
 .sc-prog {
-  padding: 12px 12px;
+  padding: 8px 6px;
   vertical-align: middle;
   border-bottom: 1px solid var(--border-soft);
   border-right: 1px solid var(--border-soft);
+  max-width: 60px;
+  overflow: hidden;
 }
 
 .prog-pill {
-  display: inline-block;
-  padding: 3px 10px;
+  display: block;
+  padding: 3px 6px;
   border-radius: 999px;
   background: var(--primary-light);
   color: var(--primary-dark);
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 700;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 /* Project column */
 .sc-proj {
-  padding: 10px 12px;
+  padding: 8px 6px;
   vertical-align: middle;
   border-bottom: 1px solid var(--border-soft);
   border-right: 1px solid var(--border-soft);
+  max-width: 60px;
+  overflow: hidden;
 }
-.sc-proj-name { font-weight: 600; color: var(--text); font-size: 14px; }
-.sc-proj-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.sc-proj-name { font-weight: 600; color: var(--text); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.sc-proj-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 
 .ov-txt { color: var(--danger); font-weight: 600; }
 
