@@ -1,2 +1,4 @@
 # Excluded from GitHub — contains user credentials and project data
 data.js
+cds_projects_import.json
+CDS Project list.xlsx
