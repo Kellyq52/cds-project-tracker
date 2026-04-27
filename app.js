@@ -1436,7 +1436,9 @@ const App = (function () {
       projNameEl.dataset.pid = proj.id;
       addrInput.value        = proj.address || '';
       addrInput.dataset.pid  = proj.id;
-      if (commentInput) commentInput.value = proj.comment || '';
+    }
+    if (commentInput && document.activeElement !== commentInput) {
+      commentInput.value = proj.comment || '';
     }
 
     const addr = proj.address || '';
