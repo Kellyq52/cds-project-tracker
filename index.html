@@ -141,6 +141,12 @@
             <a id="pmMapBtn" class="btn btn-sm pd-sv-btn hidden"
                href="#" target="_blank" rel="noopener">Map &nearr;</a>
           </div>
+          <div class="pd-address-bar pm-address-row">
+            <label class="pd-address-lbl">Comments</label>
+            <textarea id="pmCommentInput" class="comment-input pm-comment-input"
+                      placeholder="Add notes&hellip;"
+                      oninput="App.setActiveProjectComment(this.value)"></textarea>
+          </div>
         </div>
         <div class="project-scroll-area">
 

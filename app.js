@@ -566,6 +566,11 @@ const App = (function () {
     }
   }
 
+  function setActiveProjectComment(text) {
+    const proj = getActiveProject();
+    if (proj) { proj.comment = text; save(); }
+  }
+
   // ── CM Capacity view ───────────────────────────────────────────────────────
   function renderCapacityView() {
     computeAll();
@@ -1405,10 +1410,11 @@ const App = (function () {
 
   // ── Address bar ────────────────────────────────────────────────────────────
   function renderAddressBar() {
-    const progNameEl = document.getElementById('pmProgName');
-    const projNameEl = document.getElementById('pmProjNameInput');
-    const addrInput  = document.getElementById('pmAddressInput');
-    const mapBtn     = document.getElementById('pmMapBtn');
+    const progNameEl  = document.getElementById('pmProgName');
+    const projNameEl  = document.getElementById('pmProjNameInput');
+    const addrInput   = document.getElementById('pmAddressInput');
+    const mapBtn      = document.getElementById('pmMapBtn');
+    const commentInput = document.getElementById('pmCommentInput');
     if (!progNameEl) return;
 
     const proj = getActiveProject();
@@ -1417,6 +1423,7 @@ const App = (function () {
       projNameEl.value = '';
       addrInput.value  = '';
       mapBtn.classList.add('hidden');
+      if (commentInput) commentInput.value = '';
       return;
     }
 
@@ -1429,6 +1436,7 @@ const App = (function () {
       projNameEl.dataset.pid = proj.id;
       addrInput.value        = proj.address || '';
       addrInput.dataset.pid  = proj.id;
+      if (commentInput) commentInput.value = proj.comment || '';
     }
 
     const addr = proj.address || '';
@@ -2229,7 +2237,7 @@ const App = (function () {
   }
 
   return {
-    init, render, setTab, setView, setProjectStart, setProjectAddress, setProjectName, sortSummary, filterSummary, toggleSummaryColMenu, toggleSummaryCol, setProjectComment, filterCapacity, sortCapacity, navigateToProject, setPhaseAssignee,
+    init, render, setTab, setView, setProjectStart, setProjectAddress, setProjectName, sortSummary, filterSummary, toggleSummaryColMenu, toggleSummaryCol, setProjectComment, setActiveProjectComment, filterCapacity, sortCapacity, navigateToProject, setPhaseAssignee,
     toggleProgram, setActiveProject, addProgram, addProject, deleteProgram,
     openAddTask, openEditTask, closeModal, removePhase, movePhase, openAddPhase, closeAddPhaseModal, savePhase,
     addDepRow: addDepRowPublic, saveTask, deleteTask, moveTask,

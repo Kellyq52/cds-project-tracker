@@ -1452,6 +1452,20 @@ body.pd-mode .pm-only { display: none !important; }
   margin-bottom: 10px !important;
 }
 
+.pm-comment-input {
+  min-height: 30px;
+  max-height: 30px;
+  resize: none;
+  transition: max-height 0.2s ease, border-color 0.15s, box-shadow 0.15s;
+  overflow: hidden;
+}
+.pm-comment-input:focus {
+  min-height: 30px;
+  max-height: 90px;
+  resize: vertical;
+  overflow: auto;
+}
+
 .pm-name-spacer { flex: 1; }
 
 .pm-prog-label {
