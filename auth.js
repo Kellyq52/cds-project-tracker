@@ -23,7 +23,7 @@ const Auth = (function () {
     construction_manager: { addProgram: false, addProject: false, editTasks: true,  manageUsers: false, archiveProject: false, viewAll: false },
     project_manager:      { addProgram: false, addProject: false, editTasks: true,  manageUsers: false, archiveProject: false, viewAll: false },
     property_developer:   { addProgram: false, addProject: false, editTasks: true,  manageUsers: false, archiveProject: false, viewAll: false },
-    consultant:           { addProgram: false, addProject: false, editTasks: true,  manageUsers: false, archiveProject: false, viewAll: false },
+    consultant:           { addProgram: false, addProject: false, editTasks: false, manageUsers: false, archiveProject: false, viewAll: false },
     client:               { addProgram: false, addProject: false, editTasks: false, manageUsers: false, archiveProject: false, viewAll: false },
   };
 
