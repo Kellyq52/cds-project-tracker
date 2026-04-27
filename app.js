@@ -123,6 +123,14 @@ const App = (function () {
     return null;
   }
 
+  // Expand only the program that contains the active project
+  function _expandActiveProgram() {
+    const id = state.activeProjectId;
+    for (const prog of state.programs) {
+      if (prog.projects.some(p => p.id === id)) { expanded.add(prog.id); break; }
+    }
+  }
+
   // ── Active project helpers ─────────────────────────────────────────────────
   function getActiveProject() {
     const id = currentTab === 'archive' ? state.archiveActiveProjectId : state.activeProjectId;
@@ -159,7 +167,6 @@ const App = (function () {
     ];
     state.programs = defs.map(def => {
       const progId = genId('prog'), projId = genId('proj');
-      expanded.add(progId);
       let tasks = [];
       if (def.name === 'Bodybar') {
         const t1Id = genId('t'), t2Id = genId('t');
@@ -187,11 +194,11 @@ const App = (function () {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         state = JSON.parse(raw);
-        state.programs.forEach(p => expanded.add(p.id));
+        _expandActiveProgram();
         if (!('archiveActiveProjectId' in state)) state.archiveActiveProjectId = null;
       } else if (window.__CDS_STATE__ && Array.isArray(window.__CDS_STATE__.programs)) {
         state = window.__CDS_STATE__;
-        state.programs.forEach(p => expanded.add(p.id));
+        _expandActiveProgram();
         if (!('archiveActiveProjectId' in state)) state.archiveActiveProjectId = null;
         save(); // bootstrap localStorage from the portable data file
         if (window.__CDS_TEMPLATES__ && window.__CDS_TEMPLATES__.length)
@@ -1380,7 +1387,8 @@ const App = (function () {
           const imp = JSON.parse(ev.target.result);
           if (!Array.isArray(imp.programs)) throw new Error('Invalid format');
           state = imp;
-          state.programs.forEach(prog => { expanded.add(prog.id); prog.projects.forEach(proj => { proj.tasks = proj.tasks || []; proj.phaseAssignees = proj.phaseAssignees || {}; }); });
+          state.programs.forEach(prog => { prog.projects.forEach(proj => { proj.tasks = proj.tasks || []; proj.phaseAssignees = proj.phaseAssignees || {}; }); });
+          _expandActiveProgram();
           if (!state.activeProjectId) state.activeProjectId = state.programs[0]?.projects[0]?.id;
           if (!('archiveActiveProjectId' in state)) state.archiveActiveProjectId = null;
           recompute(); save(); renderSidebar(); syncHeader(); render();
