@@ -414,7 +414,7 @@ const App = (function () {
 
     // ── Controls bar ───────────────────────────────────────────────────────
     const visiblePrograms = state.programs
-      .filter(p => p.projects.some(pr => !pr.archived))
+      .filter(p => p.projects.some(pr => !pr.archived && (Auth.canViewProject(pr.id) || Auth.canViewProgram(p.id))))
       .slice().sort((a, b) => a.name.localeCompare(b.name));
 
     const filterBar = `
