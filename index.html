@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CDS Project Tracker</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="pm-mode">
+
+  <!-- ── Login Screen ──────────────────────────────────────────────────────── -->
+  <div id="loginScreen" class="login-screen">
+    <div class="login-card">
+      <div class="login-logo">CDS Project Tracker</div>
+      <div class="form-field">
+        <label class="form-label" for="loginUser">Username</label>
+        <input id="loginUser" class="form-input" type="text" autocomplete="username" placeholder="Enter username">
+      </div>
+      <div class="form-field" style="margin-top:12px">
+        <label class="form-label" for="loginPass">Password</label>
+        <input id="loginPass" class="form-input" type="password" autocomplete="current-password" placeholder="Enter password">
+      </div>
+      <div id="loginError" class="login-error hidden">Incorrect username or password.</div>
+      <button class="btn btn-primary login-btn" onclick="App.attemptLogin()">Sign In</button>
+    </div>
+  </div>
+
+  <!-- ── App Header ─────────────────────────────────────────────────────────── -->
+  <header class="app-header">
+    <span class="app-logo">CDS Project Tracker</span>
+    <div class="header-sep"></div>
+
+    <!-- Division switcher (always visible) -->
+    <div class="div-switch">
+      <button id="divPM" class="div-btn active" onclick="App.setDivision('pm')">Project Mgmt</button>
+      <button id="divPD" class="div-btn"        onclick="App.setDivision('pd')">Property Dev</button>
+    </div>
+
+    <div class="header-sep"></div>
+
+    <!-- ── PM header elements ─────────────────────────────────────────────── -->
+    <div class="header-tabs pm-only">
+      <button id="tabProject"  class="main-tab active" onclick="App.setTab('project')">Project</button>
+      <button id="tabSummary"  class="main-tab"        onclick="App.setTab('summary')">Program Summary</button>
+      <button id="tabCapacity" class="main-tab"        onclick="App.setTab('capacity')">CM Capacity</button>
+      <button id="tabArchive"  class="main-tab"        onclick="App.setTab('archive')">Archive</button>
+    </div>
+
+    <div class="header-sep pm-only"></div>
+
+
+    <div class="header-actions pm-only">
+      <div id="viewToggleGroup" class="view-toggle">
+        <button id="btnChecklist" class="toggle-btn active" onclick="App.setView('checklist')">Checklist</button>
+        <button id="btnGantt"     class="toggle-btn"        onclick="App.setView('gantt')">Gantt</button>
+      </div>
+      <button id="btnRestoreProject" class="btn btn-ghost btn-sm hidden" onclick="App.restoreCurrentProject()">&#8626; Restore</button>
+      <button class="btn btn-ghost btn-sm" onclick="App.exportJSON()">&#8595; Export</button>
+      <button class="btn btn-ghost btn-sm" onclick="App.importJSON()">&#8593; Import</button>
+      <button id="btnSaveData" class="btn btn-ghost btn-sm hidden" onclick="App.saveDataFile()" title="Download data.js — save it next to index.html so all data travels with the app files">&#128190; Save</button>
+      <button class="btn btn-ghost btn-sm no-print" onclick="App.printDoc()" title="Print / Save as PDF">&#9113; Print</button>
+    </div>
+
+    <!-- ── PD header elements ─────────────────────────────────────────────── -->
+    <div class="header-tabs pd-only">
+      <button id="pdTabProject" class="main-tab" onclick="UtilityTracker.setTab('project')">Project</button>
+      <button id="pdTabSummary" class="main-tab active" onclick="UtilityTracker.setTab('summary')">Summary</button>
+    </div>
+
+    <div class="header-sep pd-only"></div>
+
+    <div id="pdBreadcrumb" class="breadcrumb pd-only">Utility Tracker</div>
+
+    <div class="header-sep"></div>
+
+    <!-- ── User area ─────────────────────────────────────────────────────── -->
+    <div class="header-user-area">
+      <button id="btnManageUsers" class="btn btn-ghost btn-sm hidden" onclick="App.openUsersModal()">Users</button>
+      <span id="userDisplayName" class="user-display-name"></span>
+      <button class="btn btn-ghost btn-sm" onclick="App.doLogout()">Sign Out</button>
+    </div>
+  </header>
+
+  <!-- ── App body: sidebar + main ───────────────────────────────────────────── -->
+  <div class="app-layout">
+
+    <!-- ── PM Sidebar ──────────────────────────────────────────────────────── -->
+    <aside class="sidebar pm-only" id="pmSidebar">
+      <div class="sidebar-top">
+        <span id="sidebarTopLabel">Programs</span>
+        <button id="sidebarAddProgBtn" class="sidebar-add-prog" onclick="App.addProgram()" title="Add program">+ Program</button>
+      </div>
+      <div id="sidebarList" class="sidebar-list"></div>
+      <div class="sidebar-resize-handle" id="pmSidebarHandle"></div>
+    </aside>
+
+    <!-- ── PD Sidebar ──────────────────────────────────────────────────────── -->
+    <aside class="sidebar pd-only" id="pdSidebar">
+      <div class="sidebar-top">
+        <span>Programs</span>
+        <button class="sidebar-add-prog" onclick="UtilityTracker.addProgram()" title="Add program">+ Program</button>
+      </div>
+      <div id="pdSidebarList" class="sidebar-list"></div>
+      <div class="sidebar-resize-handle" id="pdSidebarHandle"></div>
+    </aside>
+
+    <!-- ── PM Main content ─────────────────────────────────────────────────── -->
+    <div class="main-content pm-only">
+
+      <div id="projectTabContent">
+        <div id="cycleWarning" class="hidden"></div>
+        <div class="pm-sticky-header">
+          <div class="pm-name-row">
+            <span id="pmProgName" class="pm-prog-label"></span>
+            <span class="pm-name-sep">/</span>
+            <input type="text" id="pmProjNameInput" class="pd-address-input pm-proj-name-input"
+                   placeholder="Project name&hellip;"
+                   oninput="App.setProjectName(this.value)">
+            <div class="pm-name-spacer"></div>
+            <div class="pm-task-counts">
+              <span class="sum-item" id="sumTotal"></span>
+              <span class="sum-item" id="sumComplete"></span>
+              <span class="sum-item" id="sumInProg"></span>
+              <span class="sum-item" id="sumOverdue"></span>
+            </div>
+            <div class="progress-wrap">
+              <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+              <span class="progress-pct" id="progressPct">0%</span>
+            </div>
+            <div class="sum-actions">
+              <button id="addTaskBtn"      class="btn btn-primary btn-sm" onclick="App.openAddTask()">+ Add Task</button>
+              <button id="addPhaseBtn"     class="btn btn-sm"             onclick="App.openAddPhase()">+ Add Phase</button>
+              <button id="loadTemplateBtn" class="btn btn-sm"             onclick="App.openTemplateModal()" title="Load or manage project templates">Templates</button>
+            </div>
+          </div>
+          <div class="pd-address-bar pm-address-row">
+            <label class="pd-address-lbl">Address</label>
+            <input type="text" id="pmAddressInput" class="pd-address-input pm-address-input"
+                   placeholder="Enter project address&hellip;"
+                   onchange="App.setProjectAddress(this.value)">
+            <a id="pmMapBtn" class="btn btn-sm pd-sv-btn hidden"
+               href="#" target="_blank" rel="noopener">Map &nearr;</a>
+          </div>
+        </div>
+        <div class="project-scroll-area">
+
+          <div id="checklistView" class="view">
+            <div class="table-scroll">
+              <table class="task-table">
+                <thead>
+                  <tr>
+                    <th style="width:40px"></th>
+                    <th>Task Name</th>
+                    <th style="width:80px"  class="center">Duration</th>
+                    <th style="width:130px">Assignee</th>
+                    <th>Dependencies</th>
+                    <th style="width:120px" class="center">Planned Start</th>
+                    <th style="width:120px" class="center">Actual Start</th>
+                    <th style="width:120px" class="center">Planned End</th>
+                    <th style="width:138px" class="center">Actual Completion</th>
+                    <th style="width:115px" class="center">Status</th>
+                    <th style="width:60px"></th>
+                  </tr>
+                </thead>
+                <tbody id="taskListBody"></tbody>
+              </table>
+            </div>
+            <div id="checklistEmpty" class="empty-state hidden">
+              <p>No tasks yet &mdash; click <strong>+ Add Phase</strong> to add a phase, or click <strong>Templates</strong> to pre-load all standard phases.</p>
+            </div>
+          </div>
+
+          <div id="ganttView" class="view hidden">
+            <div class="gantt-scroll-wrap">
+              <div id="ganttWrapper"></div>
+            </div>
+            <div class="gantt-legend-bar" id="ganttLegend"></div>
+          </div>
+
+        </div>
+      </div>
+
+      <div id="summaryTabContent" class="hidden">
+        <div id="summaryView"></div>
+      </div>
+
+      <div id="capacityTabContent" class="hidden">
+        <div id="capacityView"></div>
+      </div>
+
+    </div><!-- /pm main-content -->
+
+    <!-- ── PD Main content ─────────────────────────────────────────────────── -->
+    <div class="main-content pd-only" id="pdMainContent">
+      <div class="empty-state">Select a project from the sidebar or view the Summary.</div>
+    </div>
+
+  </div><!-- /app-layout -->
+
+  <!-- ── PM Task Modal ──────────────────────────────────────────────────────── -->
+  <div id="taskModal" class="modal-overlay hidden">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+
+      <div class="modal-header">
+        <h2 id="modalTitle">Add Task</h2>
+        <button class="btn-close" onclick="App.closeModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-field">
+            <label class="form-label" for="fName">Task Name <span style="color:#ef4444">*</span></label>
+            <input id="fName" class="form-input" type="text" placeholder="e.g. Site Survey">
+          </div>
+        </div>
+        <div class="form-row two-col">
+          <div class="form-field">
+            <label class="form-label" for="fPhase">Phase</label>
+            <select id="fPhase" class="form-select"></select>
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="fDuration">Duration (days)</label>
+            <input id="fDuration" class="form-input" type="number" min="0" value="5">
+          </div>
+        </div>
+        <div class="form-row two-col">
+          <div class="form-field">
+            <label class="form-label" for="fAssignee">Assignee</label>
+            <select id="fAssignee" class="form-select"></select>
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="fStatus">Status</label>
+            <select id="fStatus" class="form-select">
+              <option value="not_started">Not Started</option>
+              <option value="in_progress">In Progress</option>
+              <option value="complete">Complete</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row two-col">
+          <div class="form-field">
+            <label class="form-label" for="fActualStart">Actual Start Date</label>
+            <input id="fActualStart" class="form-input" type="date">
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="fActualEnd">Actual Completion Date</label>
+            <input id="fActualEnd" class="form-input" type="date">
+            <span class="form-hint">Setting this date adjusts all downstream task schedules</span>
+          </div>
+        </div>
+        <div class="dep-section">
+          <div class="dep-section-hdr">
+            <span>Dependencies</span>
+            <button class="btn btn-sm" type="button" onclick="App.addDepRow()">+ Add</button>
+          </div>
+          <div class="dep-list" id="depsContainer"></div>
+          <div style="padding:0 12px 8px; font-size:11px; color:#94a3b8">
+            <strong>FS</strong> Finish&rarr;Start &nbsp;
+            <strong>SS</strong> Start&rarr;Start &nbsp;
+            <strong>FF</strong> Finish&rarr;Finish &nbsp;
+            <strong>SF</strong> Start&rarr;Finish &nbsp;&middot;&nbsp;
+            Lag in days (negative = lead time)
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button id="btnDeleteTask" class="btn btn-danger hidden" type="button" onclick="App.deleteTask()">Delete Task</button>
+        <div class="footer-right">
+          <button class="btn" type="button" onclick="App.closeModal()">Cancel</button>
+          <button class="btn btn-primary" type="button" onclick="App.saveTask()">Save Task</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Template Picker Modal ─────────────────────────────────────────────── -->
+  <div id="templateModal" class="modal-overlay hidden">
+    <div class="modal tmpl-modal" role="dialog" aria-modal="true" aria-labelledby="templateModalTitle">
+      <div class="modal-header">
+        <h2 id="templateModalTitle">Templates</h2>
+        <button class="btn-close" onclick="App.closeTemplateModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="templateModalBody"></div>
+      <div class="modal-footer">
+        <button class="btn btn-sm" type="button" onclick="App.saveAsTemplate()">&#43; Save Current Project as Template</button>
+        <button class="btn" type="button" onclick="App.closeTemplateModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Add Phase Modal ──────────────────────────────────────────────────────── -->
+  <div id="addPhaseModal" class="modal-overlay hidden">
+    <div class="modal" style="width:380px" role="dialog" aria-modal="true" aria-labelledby="addPhaseModalTitle">
+      <div class="modal-header">
+        <h2 id="addPhaseModalTitle">Add Phase</h2>
+        <button class="btn-close" onclick="App.closeAddPhaseModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-field">
+          <label class="form-label" for="fNewPhaseName">Phase Name</label>
+          <input id="fNewPhaseName" class="form-input" type="text" list="addPhaseDatalist"
+            placeholder="Select or type a phase name&hellip;" autocomplete="off">
+          <datalist id="addPhaseDatalist"></datalist>
+          <span class="form-hint">Standard phases are suggested. Type any name to create a custom phase.</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div></div>
+        <div class="footer-right">
+          <button class="btn" type="button" onclick="App.closeAddPhaseModal()">Cancel</button>
+          <button class="btn btn-primary" type="button" onclick="App.savePhase()">Add Phase</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Users Modal ──────────────────────────────────────────────────────── -->
+  <div id="usersModal" class="modal-overlay hidden">
+    <div class="modal users-modal" role="dialog" aria-modal="true" aria-labelledby="usersModalTitle">
+      <div class="modal-header">
+        <h2 id="usersModalTitle">Manage Users</h2>
+        <button class="btn-close" onclick="App.closeUsersModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="usersModalBody"></div>
+      <div class="modal-footer" id="usersModalFooter"></div>
+    </div>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="cpm.js"></script>
+  <script src="gantt.js"></script>
+  <script src="checklist.js"></script>
+  <script src="utility_tracker.js"></script>
+  <script src="auth.js"></script>
+  <script src="app.js"></script>
+
+</body>
+</html>
