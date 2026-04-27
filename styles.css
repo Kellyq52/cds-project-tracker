@@ -815,8 +815,8 @@ body {
   position: sticky;
   left: 60px;
   z-index: 3;
-  min-width: 100px;
-  width: 100px;
+  min-width: 120px;
+  width: 120px;
   box-shadow: 3px 0 6px -2px rgba(0,0,0,0.1);
 }
 .sth-prog, .sth-proj { z-index: 6; background: #f8fafc; }
@@ -860,7 +860,7 @@ body {
   vertical-align: middle;
   border-bottom: 1px solid var(--border-soft);
   border-right: 1px solid var(--border-soft);
-  max-width: 100px;
+  max-width: 120px;
   overflow: hidden;
 }
 .sc-proj-name { font-weight: 600; color: var(--text); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
