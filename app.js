@@ -194,6 +194,8 @@ const App = (function () {
         state.programs.forEach(p => expanded.add(p.id));
         if (!('archiveActiveProjectId' in state)) state.archiveActiveProjectId = null;
         save(); // bootstrap localStorage from the portable data file
+        if (window.__CDS_TEMPLATES__ && window.__CDS_TEMPLATES__.length)
+          saveCustomTemplates(window.__CDS_TEMPLATES__);
       } else {
         seedState();
       }
@@ -1357,7 +1359,9 @@ const App = (function () {
   }
 
   function saveDataFile() {
-    const content = 'window.__CDS_STATE__ = ' + JSON.stringify(state, null, 2) + ';\n';
+    const payload = { state, templates: loadCustomTemplates() };
+    const content = 'window.__CDS_STATE__ = ' + JSON.stringify(payload.state, null, 2) + ';\n'
+                  + 'window.__CDS_TEMPLATES__ = ' + JSON.stringify(payload.templates, null, 2) + ';\n';
     const blob = new Blob([content], { type: 'application/javascript' });
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement('a');
