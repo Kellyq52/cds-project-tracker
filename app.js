@@ -514,7 +514,7 @@ const App = (function () {
           <span class="prog-pill">${esc(prog.name)}</span>
         </td>
         <td class="sc-proj">
-          <div class="sc-proj-name">${esc(proj.name)}</div>
+          <div class="sc-proj-name">${proj.number ? `<span class="proj-num">${esc(proj.number)}</span> ` : ''}${esc(proj.name)}</div>
           <div class="sc-proj-meta">${total} task${total !== 1 ? 's' : ''}${overdue ? ' &bull; <span class="ov-txt">' + overdue + ' overdue</span>' : ''}</div>
         </td>
         ${H('comments') ? '' : `<td class="sc-comment" onclick="event.stopPropagation()">
@@ -730,7 +730,8 @@ const App = (function () {
       const rowY = i * ROW_H, midY = rowY + ROW_H / 2;
       const pa  = proj.phaseAssignees || {};
       const pmN = pa['Due Diligence'] || '', cmN = pa['Construction'] || '', pdN = pa['Permitting'] || '';
-      const combined = prog.name + ' \u00b7 ' + proj.name;
+      const projLabel = (proj.number ? proj.number + ' ' : '') + proj.name;
+      const combined = prog.name + ' \u00b7 ' + projLabel;
       const labelStr = combined.length > 30 ? combined.slice(0, 29) + '\u2026' : combined;
       sLblBody += `<text x="10" y="${midY - 5}" class="g-label-name cap-proj-link" clip-path="url(#capLblClip)"
              onclick="App.navigateToProject('${proj.id}')" title="${esc(combined)}">${esc(labelStr)}</text>`;
@@ -988,7 +989,7 @@ const App = (function () {
                <button class="proj-action-btn proj-del-btn" onclick="event.stopPropagation();App.deleteProject('${proj.id}')" title="Delete permanently">&times;</button>
              </div>`;
         return `<div class="proj-item ${isActive ? 'active' : ''}" onclick="App.setActiveProject('${proj.id}')">
-          <span class="proj-name">${esc(proj.name)}</span>
+          <span class="proj-name">${proj.number ? `<span class="proj-num">${esc(proj.number)}</span> ` : ''}${esc(proj.name)}</span>
           ${actionBtn}
         </div>`;
       }).join('') : '';
@@ -1423,16 +1424,18 @@ const App = (function () {
 
   // ── Address bar ────────────────────────────────────────────────────────────
   function renderAddressBar() {
-    const progNameEl  = document.getElementById('pmProgName');
-    const projNameEl  = document.getElementById('pmProjNameInput');
-    const addrInput   = document.getElementById('pmAddressInput');
-    const mapBtn      = document.getElementById('pmMapBtn');
+    const progNameEl   = document.getElementById('pmProgName');
+    const projNumEl    = document.getElementById('pmProjNumInput');
+    const projNameEl   = document.getElementById('pmProjNameInput');
+    const addrInput    = document.getElementById('pmAddressInput');
+    const mapBtn       = document.getElementById('pmMapBtn');
     const commentInput = document.getElementById('pmCommentInput');
     if (!progNameEl) return;
 
     const proj = getActiveProject();
     if (!proj) {
       progNameEl.textContent = '';
+      if (projNumEl)  projNumEl.value  = '';
       projNameEl.value = '';
       addrInput.value  = '';
       mapBtn.classList.add('hidden');
@@ -1445,6 +1448,7 @@ const App = (function () {
     // Only overwrite inputs when switching to a different project
     // so we don't clobber text the user is actively editing
     if (projNameEl.dataset.pid !== proj.id) {
+      if (projNumEl)  { projNumEl.value = proj.number || ''; projNumEl.dataset.pid = proj.id; }
       projNameEl.value       = proj.name;
       projNameEl.dataset.pid = proj.id;
       addrInput.value        = proj.address || '';
@@ -1462,6 +1466,12 @@ const App = (function () {
   function setProjectName(val) {
     const proj = getActiveProject(); if (!proj) return;
     proj.name = val;
+    save(); renderSidebar();
+  }
+
+  function setProjectNumber(val) {
+    const proj = getActiveProject(); if (!proj) return;
+    proj.number = val.trim();
     save(); renderSidebar();
   }
 
@@ -2263,7 +2273,7 @@ const App = (function () {
   }
 
   return {
-    init, render, setTab, setView, setProjectStart, setProjectAddress, setProjectName, sortSummary, filterSummary, toggleSummaryColMenu, toggleSummaryCol, setProjectComment, setActiveProjectComment, filterCapacity, sortCapacity, navigateToProject, setPhaseAssignee,
+    init, render, setTab, setView, setProjectStart, setProjectAddress, setProjectName, setProjectNumber, sortSummary, filterSummary, toggleSummaryColMenu, toggleSummaryCol, setProjectComment, setActiveProjectComment, filterCapacity, sortCapacity, navigateToProject, setPhaseAssignee,
     toggleProgram, setActiveProject, addProgram, addProject, deleteProgram,
     openAddTask, openEditTask, closeModal, removePhase, movePhase, openAddPhase, closeAddPhaseModal, savePhase,
     addDepRow: addDepRowPublic, saveTask, deleteTask, moveTask,

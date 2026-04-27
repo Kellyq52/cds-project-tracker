@@ -113,6 +113,9 @@
           <div class="pm-name-row">
             <span id="pmProgName" class="pm-prog-label"></span>
             <span class="pm-name-sep">/</span>
+            <input type="text" id="pmProjNumInput" class="pd-address-input pm-proj-num-input"
+                   placeholder="##-####"
+                   oninput="App.setProjectNumber(this.value)">
             <input type="text" id="pmProjNameInput" class="pd-address-input pm-proj-name-input"
                    placeholder="Project name&hellip;"
                    oninput="App.setProjectName(this.value)">
