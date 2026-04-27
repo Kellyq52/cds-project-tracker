@@ -678,8 +678,8 @@ const App = (function () {
     // Layout
     const LABEL_W  = 260;
     const HEADER_H = 48;
-    const ROW_H    = 60;
-    const BAR_H    = 26;
+    const ROW_H    = 44;
+    const BAR_H    = 18;
     const BAR_PAD  = (ROW_H - BAR_H) / 2;
     // Fit ~14 months in the available width; scroll if project span is longer
     const DAY_W    = Math.max(2, Math.floor((container.offsetWidth - LABEL_W) / 426));
@@ -699,7 +699,7 @@ const App = (function () {
     let sLblHdr = '';
     sLblHdr += `<rect x="0" y="0" width="${LABEL_W}" height="${HEADER_H}" fill="#f1f5f9"/>`;
     sLblHdr += `<line x1="0" y1="${HEADER_H - 1}" x2="${LABEL_W}" y2="${HEADER_H - 1}" stroke="#cbd5e1" stroke-width="1.5"/>`;
-    sLblHdr += `<text x="10" y="20" class="g-label-hdr">Project</text>`;
+    sLblHdr += `<text x="10" y="20" class="g-label-hdr">Program / Project</text>`;
     sLblHdr += `<text x="10" y="37" class="g-label-hdr">PM / CM / PD</text>`;
 
     // ── Left column: label body SVG ────────────────────────────────────────
@@ -715,12 +715,13 @@ const App = (function () {
       const rowY = i * ROW_H, midY = rowY + ROW_H / 2;
       const pa  = proj.phaseAssignees || {};
       const pmN = pa['Due Diligence'] || '', cmN = pa['Construction'] || '', pdN = pa['Permitting'] || '';
+      const progStr = prog.name.length > 25 ? prog.name.slice(0, 24) + '\u2026' : prog.name;
       const nameStr = proj.name.length > 25 ? proj.name.slice(0, 24) + '\u2026' : proj.name;
-      sLblBody += `<text x="10" y="${midY - 10}" class="g-label-name cap-proj-link" clip-path="url(#capLblClip)"
+      sLblBody += `<text x="10" y="${midY - 9}" class="g-label-sub" fill="#64748b" clip-path="url(#capLblClip)">${esc(progStr)}</text>`;
+      sLblBody += `<text x="10" y="${midY + 4}" class="g-label-name cap-proj-link" clip-path="url(#capLblClip)"
              onclick="App.navigateToProject('${proj.id}')" title="Open project">${esc(nameStr)}</text>`;
-      sLblBody += `<text x="10" y="${midY + 5}" class="g-label-sub" fill="#64748b" clip-path="url(#capLblClip)">${esc(prog.name)}</text>`;
       const meta = [pmN ? 'PM:\u00a0' + pmN : '', cmN ? 'CM:\u00a0' + cmN : '', pdN ? 'PD:\u00a0' + pdN : ''].filter(Boolean).join('  \u00b7  ');
-      if (meta) sLblBody += `<text x="10" y="${midY + 18}" class="cap-meta-label" clip-path="url(#capLblClip)">${esc(meta)}</text>`;
+      if (meta) sLblBody += `<text x="10" y="${midY + 16}" class="cap-meta-label" clip-path="url(#capLblClip)">${esc(meta)}</text>`;
     });
 
     // ── Right column: chart header SVG ─────────────────────────────────────
