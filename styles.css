@@ -808,15 +808,15 @@ body {
   left: 0;
   z-index: 3;
   background: #f8fafc;
-  min-width: 130px;
-  width: 130px;
+  min-width: 100px;
+  width: 100px;
 }
 .sth-proj, .sc-proj {
   position: sticky;
-  left: 130px;
+  left: 100px;
   z-index: 3;
-  min-width: 160px;
-  width: 160px;
+  min-width: 130px;
+  width: 130px;
   box-shadow: 3px 0 6px -2px rgba(0,0,0,0.1);
 }
 .sth-prog, .sth-proj { z-index: 6; background: #f8fafc; }
