@@ -1020,7 +1020,11 @@ const App = (function () {
 
   function setActiveProject(projId) {
     if (currentTab === 'archive') state.archiveActiveProjectId = projId;
-    else state.activeProjectId = projId;
+    else {
+      state.activeProjectId = projId;
+      expanded.clear();
+      _expandActiveProgram();
+    }
     Gantt.reset();
     save();
     if (currentTab === 'summary' || currentTab === 'capacity') {
