@@ -1628,9 +1628,9 @@ const App = (function () {
     const rows = sortedUsers.map(u => {
       const uRoles = _userRoles(u);
       let access;
-      if (uRoles.some(r => Auth.PERMS[r]?.viewAll))   access = 'All';
-      else if (uRoles.includes('program_manager'))     access = `${(u.assignedPrograms || []).length} program(s)`;
-      else                                              access = `${(u.assignedProjects || []).length} project(s)`;
+      if (uRoles.some(r => Auth.PERMS[r]?.viewAll))                                                                    access = 'All';
+      else if (uRoles.includes('program_manager') || uRoles.includes('client') || uRoles.includes('consultant'))  access = `${(u.assignedPrograms || []).length} program(s)`;
+      else                                                                                                          access = `${(u.assignedProjects || []).length} project(s)`;
       const isSelf = u.id === Auth.current()?.id;
       const badges = uRoles.map(r => `<span class="role-badge role-${r}">${esc(Auth.ROLE_LABELS[r] || r)}</span>`).join(' ');
       return `<tr>
@@ -1680,10 +1680,12 @@ const App = (function () {
       </div>`;
     }).join('') || '<span class="form-hint">No active projects yet.</span>';
 
-    const hasAdmin = userRoles.has('administrator');
-    const hasPM    = userRoles.has('program_manager');
-    const hideProjs = hasAdmin;
-    const hideProgs = !hasPM || hasAdmin;
+    const hasAdmin          = userRoles.has('administrator');
+    const hasPM             = userRoles.has('program_manager');
+    const hasClientConsult  = userRoles.has('client') || userRoles.has('consultant');
+    const usePrograms       = !hasAdmin && (hasPM || hasClientConsult);
+    const hideProjs = hasAdmin || usePrograms;
+    const hideProgs = !usePrograms;
 
     container.innerHTML = `
       <div class="form-row two-col">
@@ -1731,12 +1733,14 @@ const App = (function () {
 
   function onUserRoleChange() {
     const checked = Array.from(document.querySelectorAll('input[name="assignRole"]:checked')).map(c => c.value);
-    const hasAdmin = checked.includes('administrator');
-    const hasPM    = checked.includes('program_manager');
+    const hasAdmin         = checked.includes('administrator');
+    const hasPM            = checked.includes('program_manager');
+    const hasClientConsult = checked.includes('client') || checked.includes('consultant');
+    const usePrograms      = !hasAdmin && (hasPM || hasClientConsult);
     const projSec = document.getElementById('ufProjectsSection');
     const progSec = document.getElementById('ufProgramsSection');
-    if (projSec) projSec.style.display = hasAdmin ? 'none' : '';
-    if (progSec) progSec.style.display = (!hasAdmin && hasPM) ? '' : 'none';
+    if (projSec) projSec.style.display = (hasAdmin || usePrograms) ? 'none' : '';
+    if (progSec) progSec.style.display = usePrograms ? '' : 'none';
   }
 
   function openAddUser() {
@@ -1777,12 +1781,14 @@ const App = (function () {
     );
     if (dupId) { alert('User ID "' + userId + '" is already in use.'); return; }
 
-    const hasAdmin = roles.includes('administrator');
-    const hasPM    = roles.includes('program_manager');
+    const hasAdmin         = roles.includes('administrator');
+    const hasPM            = roles.includes('program_manager');
+    const hasClientConsult = roles.includes('client') || roles.includes('consultant');
+    const usePrograms      = !hasAdmin && (hasPM || hasClientConsult);
     const projCbs = document.querySelectorAll('input[name="assignProj"]');
     const progCbs = document.querySelectorAll('input[name="assignProg"]');
-    const assignedProjects = hasAdmin ? [] : Array.from(projCbs).filter(c => c.checked).map(c => c.value);
-    const assignedPrograms = (!hasAdmin && hasPM) ? Array.from(progCbs).filter(c => c.checked).map(c => c.value) : [];
+    const assignedProjects = (!hasAdmin && !usePrograms) ? Array.from(projCbs).filter(c => c.checked).map(c => c.value) : [];
+    const assignedPrograms = usePrograms ? Array.from(progCbs).filter(c => c.checked).map(c => c.value) : [];
 
     if (isNew) {
       state.users.push({ id: userId, name, username, password, roles, assignedProjects, assignedPrograms });
