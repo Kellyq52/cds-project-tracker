@@ -3,10 +3,11 @@
 
 const Auth = (function () {
 
-  const ROLES = ['administrator', 'program_manager', 'construction_manager', 'project_manager', 'property_developer', 'consultant', 'client'];
+  const ROLES = ['administrator', 'program_developer', 'program_manager', 'construction_manager', 'project_manager', 'property_developer', 'consultant', 'client'];
 
   const ROLE_LABELS = {
     administrator:        'Administrator',
+    program_developer:    'Program Developer',
     program_manager:      'Program Manager',
     construction_manager: 'Construction Manager',
     project_manager:      'Project Manager',
@@ -19,6 +20,7 @@ const Auth = (function () {
   const PERMS = {
     //                             addProg  addProj  editTasks  users    archive  viewAll
     administrator:        { addProgram: true,  addProject: true,  editTasks: true,  manageUsers: true,  archiveProject: true,  viewAll: true  },
+    program_developer:    { addProgram: true,  addProject: true,  editTasks: true,  manageUsers: false, archiveProject: true,  viewAll: true  },
     program_manager:      { addProgram: false, addProject: true,  editTasks: true,  manageUsers: false, archiveProject: true,  viewAll: false },
     construction_manager: { addProgram: false, addProject: false, editTasks: true,  manageUsers: false, archiveProject: false, viewAll: false },
     project_manager:      { addProgram: false, addProject: false, editTasks: true,  manageUsers: false, archiveProject: false, viewAll: false },

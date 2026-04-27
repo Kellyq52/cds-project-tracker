@@ -1565,6 +1565,7 @@ const App = (function () {
   // The most-permissive role wins so elevated users never see incorrect restrictions.
   function _effectiveCssRole(roles) {
     if (roles.includes('administrator')) return 'administrator';
+    if (roles.includes('program_developer')) return 'administrator';
     if (roles.includes('program_manager')) return 'program_manager';
     if (roles.some(r => ['construction_manager', 'project_manager', 'property_developer', 'consultant'].includes(r))) return 'consultant';
     if (roles.includes('client')) return 'client';
@@ -1589,7 +1590,7 @@ const App = (function () {
     });
 
     // Division access: only administrators and property_developers can see the PD division
-    const canSeePD = roles.includes('administrator') || roles.includes('property_developer');
+    const canSeePD = roles.includes('administrator') || roles.includes('program_developer') || roles.includes('property_developer');
     const divSwitch = document.querySelector('.div-switch');
     if (divSwitch) divSwitch.classList.toggle('hidden', !canSeePD);
     if (!canSeePD && currentDivision === 'pd') setDivision('pm');
@@ -1637,7 +1638,7 @@ const App = (function () {
       container.innerHTML = '<p style="padding:16px;color:#94a3b8">No users.</p>';
       return;
     }
-    const ROLE_ORDER = ['administrator', 'program_manager', 'project_manager', 'construction_manager', 'property_developer', 'consultant', 'client'];
+    const ROLE_ORDER = ['administrator', 'program_developer', 'program_manager', 'project_manager', 'construction_manager', 'property_developer', 'consultant', 'client'];
     const sortedUsers = [...state.users].sort((a, b) => {
       const aRoles = _userRoles(a);
       const bRoles = _userRoles(b);
@@ -1702,7 +1703,7 @@ const App = (function () {
       </div>`;
     }).join('') || '<span class="form-hint">No active projects yet.</span>';
 
-    const hasAdmin          = userRoles.has('administrator');
+    const hasAdmin          = userRoles.has('administrator') || userRoles.has('program_developer');
     const hasPM             = userRoles.has('program_manager');
     const hasClientConsult  = userRoles.has('client') || userRoles.has('consultant');
     const usePrograms       = !hasAdmin && (hasPM || hasClientConsult);
@@ -1755,7 +1756,7 @@ const App = (function () {
 
   function onUserRoleChange() {
     const checked = Array.from(document.querySelectorAll('input[name="assignRole"]:checked')).map(c => c.value);
-    const hasAdmin         = checked.includes('administrator');
+    const hasAdmin         = checked.includes('administrator') || checked.includes('program_developer');
     const hasPM            = checked.includes('program_manager');
     const hasClientConsult = checked.includes('client') || checked.includes('consultant');
     const usePrograms      = !hasAdmin && (hasPM || hasClientConsult);
@@ -1803,7 +1804,7 @@ const App = (function () {
     );
     if (dupId) { alert('User ID "' + userId + '" is already in use.'); return; }
 
-    const hasAdmin         = roles.includes('administrator');
+    const hasAdmin         = roles.includes('administrator') || roles.includes('program_developer');
     const hasPM            = roles.includes('program_manager');
     const hasClientConsult = roles.includes('client') || roles.includes('consultant');
     const usePrograms      = !hasAdmin && (hasPM || hasClientConsult);
@@ -2262,7 +2263,7 @@ const App = (function () {
     if (div === 'pd') {
       const user = Auth.current();
       const roles = user ? _userRoles(user) : [];
-      if (!roles.includes('administrator') && !roles.includes('property_developer')) return;
+      if (!roles.includes('administrator') && !roles.includes('program_developer') && !roles.includes('property_developer')) return;
     }
     currentDivision = div;
     document.getElementById('divPM').classList.toggle('active', div === 'pm');
