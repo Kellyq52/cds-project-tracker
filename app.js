@@ -715,13 +715,12 @@ const App = (function () {
       const rowY = i * ROW_H, midY = rowY + ROW_H / 2;
       const pa  = proj.phaseAssignees || {};
       const pmN = pa['Due Diligence'] || '', cmN = pa['Construction'] || '', pdN = pa['Permitting'] || '';
-      const progStr = prog.name.length > 25 ? prog.name.slice(0, 24) + '\u2026' : prog.name;
-      const nameStr = proj.name.length > 25 ? proj.name.slice(0, 24) + '\u2026' : proj.name;
-      sLblBody += `<text x="10" y="${midY - 9}" class="g-label-sub" fill="#64748b" clip-path="url(#capLblClip)">${esc(progStr)}</text>`;
-      sLblBody += `<text x="10" y="${midY + 4}" class="g-label-name cap-proj-link" clip-path="url(#capLblClip)"
-             onclick="App.navigateToProject('${proj.id}')" title="Open project">${esc(nameStr)}</text>`;
+      const combined = prog.name + ' \u00b7 ' + proj.name;
+      const labelStr = combined.length > 30 ? combined.slice(0, 29) + '\u2026' : combined;
+      sLblBody += `<text x="10" y="${midY - 5}" class="g-label-name cap-proj-link" clip-path="url(#capLblClip)"
+             onclick="App.navigateToProject('${proj.id}')" title="${esc(combined)}">${esc(labelStr)}</text>`;
       const meta = [pmN ? 'PM:\u00a0' + pmN : '', cmN ? 'CM:\u00a0' + cmN : '', pdN ? 'PD:\u00a0' + pdN : ''].filter(Boolean).join('  \u00b7  ');
-      if (meta) sLblBody += `<text x="10" y="${midY + 16}" class="cap-meta-label" clip-path="url(#capLblClip)">${esc(meta)}</text>`;
+      if (meta) sLblBody += `<text x="10" y="${midY + 10}" class="cap-meta-label" clip-path="url(#capLblClip)">${esc(meta)}</text>`;
     });
 
     // ── Right column: chart header SVG ─────────────────────────────────────
