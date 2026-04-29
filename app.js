@@ -893,14 +893,15 @@ const App = (function () {
         }
       }
 
-      // Draw labels — each label is placed in the widest exclusive (non-overlapping) segment of its bar
+      // Draw labels — anchored in each bar's exclusive region, then collision-resolved
       const LABELED_PHASES = new Set(['Due Diligence', 'Design', 'Permitting', 'Bidding', 'Construction']);
       const PHASE_LABELS   = { 'Due Diligence': 'DD', 'Design': 'Design', 'Permitting': 'Permit', 'Bidding': 'Bid', 'Construction': 'Construction' };
-      const labeledBars    = bars.filter(b => LABELED_PHASES.has(b.phase));
+      const LABEL_HW       = { 'DD': 9, 'Design': 22, 'Permit': 22, 'Bid': 12, 'Construction': 41 }; // approx half-widths at 10px bold
+      const labeledBars    = bars.filter(b => LABELED_PHASES.has(b.phase) && (b.endD - b.startD + 1) * DAY_W >= 4);
       const labelY         = barY + BAR_H / 2 + 4;
 
-      labeledBars.forEach(({ phase, startD, endD, colors }, lblIdx) => {
-        // Start with the full bar as one segment, then subtract all other labeled bars' ranges
+      // Step 1: anchor each label at the center of its widest exclusive segment
+      const labelInfo = labeledBars.map(({ phase, startD, endD, colors }, lblIdx) => {
         let segs = [{ s: startD, e: endD }];
         labeledBars.forEach((other, oi) => {
           if (oi === lblIdx) return;
@@ -914,17 +915,32 @@ const App = (function () {
             return out;
           });
         });
-        // Pick widest exclusive segment
-        const best = segs.reduce((b, s) => (s.e - s.s > (b ? b.e - b.s : -1) ? s : b), null);
-        if (!best) return;
-        const segX = best.s * DAY_W, segW = (best.e - best.s + 1) * DAY_W;
-        if (segW < 26) return; // too narrow to show a label
-        const labelX = segX + segW / 2;
-        const clipId = `bc_${i}_${phase.replace(/\W/g, '_')}`;
-        barsStr += `<clipPath id="${clipId}"><rect x="${segX}" y="${barY}" width="${segW}" height="${BAR_H}"/></clipPath>`;
-        barsStr += `<text x="${labelX}" y="${labelY}" class="cap-bar-label" text-anchor="middle"
-               fill="${colors.text}" pointer-events="none" clip-path="url(#${clipId})"
-               >${esc(PHASE_LABELS[phase])}</text>`;
+        const best = segs.length ? segs.reduce((b, s) => s.e - s.s > b.e - b.s ? s : b) : { s: startD, e: endD };
+        return { phase, colors, x: (best.s + (best.e - best.s + 1) / 2) * DAY_W };
+      });
+
+      // Step 2: collision-resolve — sort by x, push overlapping labels apart (no bar-bounds clamping)
+      labelInfo.sort((a, b) => a.x - b.x);
+      for (let pass = 0; pass < 12; pass++) {
+        let moved = false;
+        for (let k = 0; k < labelInfo.length - 1; k++) {
+          const A = labelInfo[k], B = labelInfo[k + 1];
+          const need = (LABEL_HW[PHASE_LABELS[A.phase]] || 20) + (LABEL_HW[PHASE_LABELS[B.phase]] || 20) + 3;
+          const gap  = B.x - A.x;
+          if (gap < need) {
+            const push = (need - gap) / 2;
+            A.x -= push;
+            B.x += push;
+            moved = true;
+          }
+        }
+        if (!moved) break;
+      }
+
+      // Step 3: render
+      labelInfo.forEach(({ phase, colors, x }) => {
+        barsStr += `<text x="${x}" y="${labelY}" class="cap-bar-label" text-anchor="middle"
+               fill="${colors.text}" pointer-events="none">${esc(PHASE_LABELS[phase])}</text>`;
       });
     });
     sChartBody += `<g clip-path="url(#capChartClip)">${barsStr}</g>`;
