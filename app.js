@@ -98,7 +98,7 @@ const App = (function () {
   let currentDivision = 'pm';     // 'pm' | 'pd'
   let summarySort   = { col: 'program', dir: 'asc' };
   let summaryFilter = '';         // '' = all programs, otherwise program id
-  let summaryShowPipeline = false; // when true, only show projects with no tasks yet
+  let summaryProjectFilter = 'active'; // 'active' = projects with tasks | 'pipeline' = projects with no tasks
   let summaryHiddenCols = new Set(); // persisted in localStorage
   let capacityFilter = { pm: '', cm: '', pd: '', program: '' };
   let capacitySort   = { phase: '', dir: 'asc' };
@@ -454,7 +454,7 @@ const App = (function () {
             ).join('')}
           </select>
         </div>
-        <button class="btn btn-sm ${summaryShowPipeline ? 'btn-active' : ''}" onclick="App.toggleSummaryPipeline()" title="Toggle: only show projects with no tasks yet">Pipeline</button>
+        <button class="btn btn-sm btn-active" onclick="App.toggleSummaryPipeline()" title="Switch between active and pipeline projects">${summaryProjectFilter === 'active' ? 'Active' : 'Pipeline'}</button>
         <div class="col-toggle-wrap" id="summaryColToggleWrap">
           <button class="btn btn-sm col-toggle-btn" onclick="App.toggleSummaryColMenu(event)">Columns &#9662;</button>
           <div class="col-menu" id="summaryColMenu">
@@ -474,7 +474,8 @@ const App = (function () {
       if (summaryFilter && prog.id !== summaryFilter) continue;
       for (const proj of prog.projects) {
         if (!proj.archived && (Auth.canViewProject(proj.id) || Auth.canViewProgram(prog.id))) {
-          if (summaryShowPipeline && (proj.tasks || []).length > 0) continue;
+          if (summaryProjectFilter === 'active'   && (proj.tasks || []).length === 0) continue;
+          if (summaryProjectFilter === 'pipeline' && (proj.tasks || []).length  >  0) continue;
           rows.push({ prog, proj });
         }
       }
@@ -579,7 +580,7 @@ const App = (function () {
   }
 
   function toggleSummaryPipeline() {
-    summaryShowPipeline = !summaryShowPipeline;
+    summaryProjectFilter = summaryProjectFilter === 'active' ? 'pipeline' : 'active';
     renderSummaryView();
   }
 
