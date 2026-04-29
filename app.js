@@ -474,7 +474,7 @@ const App = (function () {
     for (const prog of state.programs) {
       if (summaryFilter && prog.id !== summaryFilter) continue;
       for (const proj of prog.projects) {
-        if (!proj.archived && (myProjectsOnly ? isMyProject(proj) : true)) {
+        if (!proj.archived && (myProjectsOnly ? isMyProject(proj, prog) : true)) {
           if (summaryProjectFilter === 'active'   && (proj.tasks || []).length === 0) continue;
           if (summaryProjectFilter === 'pipeline' && (proj.tasks || []).length  >  0) continue;
           rows.push({ prog, proj });
@@ -588,9 +588,10 @@ const App = (function () {
     if (currentTab === 'summary') renderSummaryView();
   }
 
-  function isMyProject(proj) {
+  function isMyProject(proj, prog) {
     const uid = Auth.current()?.id;
     if (!uid) return false;
+    if (prog && Auth.canViewProgram(prog.id)) return true;  // program manager — all projects in program
     if ((proj.tasks || []).some(t => t.assignee === uid)) return true;
     return Object.values(proj.phaseAssignees || {}).some(v => v === uid);
   }
@@ -1042,7 +1043,7 @@ const App = (function () {
       const progVisible = Auth.canViewProgram(prog.id); // program_manager assigned to this program
       const filtered = prog.projects.filter(p =>
         (isArchive ? !!p.archived : !p.archived) &&
-        (isArchive ? (Auth.canViewProject(p.id) || progVisible) : (!myProjectsOnly || isMyProject(p))) &&
+        (isArchive ? (Auth.canViewProject(p.id) || progVisible) : (!myProjectsOnly || isMyProject(p, prog))) &&
         (isArchive || summaryProjectFilter === 'all' ||
          (summaryProjectFilter === 'active'   && (p.tasks || []).length > 0) ||
          (summaryProjectFilter === 'pipeline' && (p.tasks || []).length === 0))
