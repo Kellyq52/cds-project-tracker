@@ -89,11 +89,7 @@
       <div class="sidebar-top">
         <span id="sidebarTopLabel">Programs</span>
         <div class="sidebar-top-actions">
-          <div id="sidebarFilterGroup" class="sidebar-status-filter">
-            <button class="sf-btn" id="sfActive"   onclick="App.setSummaryProjectFilter('active')">Active</button>
-            <button class="sf-btn" id="sfPipeline" onclick="App.setSummaryProjectFilter('pipeline')">Pipeline</button>
-            <button class="sf-btn" id="sfAll"      onclick="App.setSummaryProjectFilter('all')">All</button>
-          </div>
+          <button id="sidebarFilterBtn" class="sidebar-filter-btn" onclick="App.cycleSummaryProjectFilter()">Active</button>
           <button id="sidebarAddProgBtn" class="sidebar-add-prog" onclick="App.addProgram()" title="Add program">+ Program</button>
         </div>
       </div>

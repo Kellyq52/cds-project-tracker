@@ -580,8 +580,9 @@ const App = (function () {
     renderSummaryView();
   }
 
-  function setSummaryProjectFilter(val) {
-    summaryProjectFilter = val;
+  function cycleSummaryProjectFilter() {
+    const order = ['active', 'pipeline', 'all'];
+    summaryProjectFilter = order[(order.indexOf(summaryProjectFilter) + 1) % order.length];
     renderSidebar();
     if (currentTab === 'summary') renderSummaryView();
   }
@@ -1009,12 +1010,12 @@ const App = (function () {
     if (labelEl)   labelEl.textContent = isArchive ? 'Archived' : 'Programs';
     if (addProgEl) addProgEl.classList.toggle('hidden', isArchive);
 
-    // Sync filter button states (hidden on archive tab)
-    const sfGroup = document.getElementById('sidebarFilterGroup');
-    if (sfGroup) sfGroup.classList.toggle('hidden', isArchive);
-    document.getElementById('sfActive')  ?.classList.toggle('active', summaryProjectFilter === 'active');
-    document.getElementById('sfPipeline')?.classList.toggle('active', summaryProjectFilter === 'pipeline');
-    document.getElementById('sfAll')     ?.classList.toggle('active', summaryProjectFilter === 'all');
+    // Sync filter button (hidden on archive tab)
+    const sfBtn = document.getElementById('sidebarFilterBtn');
+    if (sfBtn) {
+      sfBtn.classList.toggle('hidden', isArchive);
+      sfBtn.textContent = summaryProjectFilter.charAt(0).toUpperCase() + summaryProjectFilter.slice(1);
+    }
 
     const today = CPM.todayIso();
     list.innerHTML = [...state.programs].sort((a, b) => a.name.localeCompare(b.name)).map(prog => {
@@ -2330,7 +2331,7 @@ const App = (function () {
   }
 
   return {
-    init, render, setTab, setView, setProjectStart, setProjectAddress, setProjectName, setProjectNumber, sortSummary, filterSummary, setSummaryProjectFilter, toggleSummaryColMenu, toggleSummaryCol, setProjectComment, setActiveProjectComment, filterCapacity, sortCapacity, navigateToProject, setPhaseAssignee,
+    init, render, setTab, setView, setProjectStart, setProjectAddress, setProjectName, setProjectNumber, sortSummary, filterSummary, cycleSummaryProjectFilter, toggleSummaryColMenu, toggleSummaryCol, setProjectComment, setActiveProjectComment, filterCapacity, sortCapacity, navigateToProject, setPhaseAssignee,
     toggleProgram, setActiveProject, addProgram, addProject, deleteProgram,
     openAddTask, openEditTask, closeModal, removePhase, movePhase, openAddPhase, closeAddPhaseModal, savePhase,
     addDepRow: addDepRowPublic, saveTask, deleteTask, moveTask,
