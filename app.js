@@ -715,11 +715,11 @@ const App = (function () {
       return a.proj.name.localeCompare(b.proj.name);
     });
 
-    // Date range: 13 weeks before today through 12 months ahead
+    // Date range: 13 weeks before today through 24 months ahead
     const todayDay  = CPM.isoToDay(today);
     const [ty, tm, td] = today.split('-').map(Number);
     const minDay    = todayDay - 91;  // 13 weeks back
-    const maxDay    = CPM.isoToDay(new Date(Date.UTC(ty, tm - 1 + 12, td)).toISOString().slice(0, 10));
+    const maxDay    = CPM.isoToDay(new Date(Date.UTC(ty, tm - 1 + 24, td)).toISOString().slice(0, 10));
     const totalDays = maxDay - minDay + 1;
 
     // Layout
@@ -950,7 +950,7 @@ const App = (function () {
 
     const inner = document.createElement('div');
     inner.className = 'cap-inner';
-    inner.style.minWidth = (LABEL_W + chartW) + 'px';
+    inner.style.width = (LABEL_W + chartW) + 'px';
     inner.appendChild(hdrRow);
     inner.appendChild(bodyRow);
 
