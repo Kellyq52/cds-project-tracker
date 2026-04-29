@@ -55,6 +55,7 @@ const Gantt = (function () {
     }
 
     // Collapse all phases by default on first render for this project
+    const isFirstRender = !_initialized;
     if (!_initialized) {
       tasks.forEach(t => { if (t.phase) collapsedPhases.add(t.phase); });
       _initialized = true;
@@ -378,6 +379,18 @@ const Gantt = (function () {
 
     wrapper.innerHTML = '';
     wrapper.appendChild(inner);
+
+    // Scroll to 3 months before today on first render of each project
+    if (isFirstRender) {
+      const scrollWrap = wrapper.closest('.gantt-scroll-wrap');
+      if (scrollWrap) {
+        const threeMonthsAgoDate = new Date(today + 'T12:00:00Z');
+        threeMonthsAgoDate.setUTCMonth(threeMonthsAgoDate.getUTCMonth() - 3);
+        const threeMonthsAgoIso = threeMonthsAgoDate.toISOString().slice(0, 10);
+        const scrollX = Math.max(0, (CPM.isoToDay(threeMonthsAgoIso) - minDay) * DAY_W);
+        scrollWrap.scrollLeft = scrollX;
+      }
+    }
 
     // Legend
     const legend = document.getElementById('ganttLegend');
