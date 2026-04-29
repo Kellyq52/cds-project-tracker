@@ -893,39 +893,38 @@ const App = (function () {
         }
       }
 
-      // Draw labels on top of everything (including blend overlays)
+      // Draw labels — each label is placed in the widest exclusive (non-overlapping) segment of its bar
       const LABELED_PHASES = new Set(['Due Diligence', 'Design', 'Permitting', 'Bidding', 'Construction']);
       const PHASE_LABELS   = { 'Due Diligence': 'DD', 'Design': 'Design', 'Permitting': 'Permit', 'Bidding': 'Bid', 'Construction': 'Construction' };
-      const labeledBars    = bars.filter(b => LABELED_PHASES.has(b.phase) && Math.max((b.endD - b.startD + 1) * DAY_W, 4) > 34);
+      const labeledBars    = bars.filter(b => LABELED_PHASES.has(b.phase));
       const labelY         = barY + BAR_H / 2 + 4;
 
-      // Default label X to bar center; shift into non-overlapping region when two labeled bars overlap
-      const labelXMap = new Map(labeledBars.map(b => [b.phase, b.startD * DAY_W + Math.max((b.endD - b.startD + 1) * DAY_W, 4) / 2]));
-      for (let a = 0; a < labeledBars.length; a++) {
-        for (let b = a + 1; b < labeledBars.length; b++) {
-          const A = labeledBars[a], B = labeledBars[b];
-          const oStart = Math.max(A.startD, B.startD);
-          const oEnd   = Math.min(A.endD,   B.endD);
-          if (oStart > oEnd) continue;
-          // Earlier-starting bar → label in its left (pre-overlap) region
-          // Later-starting bar  → label in its right (post-overlap) region
-          const [first, second] = A.endD <= B.endD ? [A, B] : [B, A];
-          if (first.startD < oStart)
-            labelXMap.set(first.phase,  (first.startD + oStart) / 2 * DAY_W);
-          if (second.endD > oEnd)
-            labelXMap.set(second.phase, (oEnd + second.endD + 2) / 2 * DAY_W);
-        }
-      }
-
-      labeledBars.forEach(({ phase, startD, endD, colors }) => {
-        const barX   = startD * DAY_W;
-        const barW   = Math.max((endD - startD + 1) * DAY_W, 4);
-        const labelX = Math.max(barX + 6, Math.min(barX + barW - 6, labelXMap.get(phase)));
+      labeledBars.forEach(({ phase, startD, endD, colors }, lblIdx) => {
+        // Start with the full bar as one segment, then subtract all other labeled bars' ranges
+        let segs = [{ s: startD, e: endD }];
+        labeledBars.forEach((other, oi) => {
+          if (oi === lblIdx) return;
+          const oS = Math.max(startD, other.startD), oE = Math.min(endD, other.endD);
+          if (oS > oE) return;
+          segs = segs.flatMap(seg => {
+            if (seg.e < oS || seg.s > oE) return [seg];
+            const out = [];
+            if (seg.s < oS) out.push({ s: seg.s, e: oS - 1 });
+            if (seg.e > oE) out.push({ s: oE + 1, e: seg.e });
+            return out;
+          });
+        });
+        // Pick widest exclusive segment
+        const best = segs.reduce((b, s) => (s.e - s.s > (b ? b.e - b.s : -1) ? s : b), null);
+        if (!best) return;
+        const segX = best.s * DAY_W, segW = (best.e - best.s + 1) * DAY_W;
+        if (segW < 26) return; // too narrow to show a label
+        const labelX = segX + segW / 2;
         const clipId = `bc_${i}_${phase.replace(/\W/g, '_')}`;
-        barsStr += `<clipPath id="${clipId}"><rect x="${barX + 1}" y="${barY}" width="${Math.max(barW - 2, 0)}" height="${BAR_H}"/></clipPath>`;
-        barsStr += `<text x="${labelX}" y="${labelY}"
-               class="cap-bar-label" text-anchor="middle" fill="${colors.text}" pointer-events="none"
-               clip-path="url(#${clipId})">${esc(PHASE_LABELS[phase])}</text>`;
+        barsStr += `<clipPath id="${clipId}"><rect x="${segX}" y="${barY}" width="${segW}" height="${BAR_H}"/></clipPath>`;
+        barsStr += `<text x="${labelX}" y="${labelY}" class="cap-bar-label" text-anchor="middle"
+               fill="${colors.text}" pointer-events="none" clip-path="url(#${clipId})"
+               >${esc(PHASE_LABELS[phase])}</text>`;
       });
     });
     sChartBody += `<g clip-path="url(#capChartClip)">${barsStr}</g>`;
