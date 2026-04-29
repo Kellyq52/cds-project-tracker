@@ -3,9 +3,10 @@
 'use strict';
 
 // ── Phase constants (global — used by checklist.js, gantt.js, summary) ────────
-const PHASES = ['Onboarding', 'Due Diligence', 'On Hold', 'Design', 'Permitting', 'Bidding', 'Financing', 'Construction', 'Close Out'];
+const PHASES = ['Pipeline', 'Onboarding', 'Due Diligence', 'On Hold', 'Design', 'Permitting', 'Bidding', 'Financing', 'Construction', 'Close Out'];
 
 const PHASE_COLORS = {
+  'Pipeline':         { bg: '#ccfbf1', text: '#0f766e' },
   'Onboarding':       { bg: '#dbeafe', text: '#1d4ed8' },
   'Due Diligence':  { bg: '#dcfce7', text: '#15803d' },
   'On Hold':        { bg: '#f1f5f9', text: '#475569' },
@@ -29,6 +30,10 @@ const SUMMARY_COLS = [
 ];
 
 const PHASE_TASKS = {
+  'Pipeline': [
+    { name: 'Sign Franchisee Agreement', duration: 1  },
+    { name: 'Real Estate Search',        duration: 30 },
+  ],
   'Onboarding': [
     { name: 'Intro call to client',          duration: 1  },
     { name: 'Set up project',                duration: 2  },
@@ -260,14 +265,39 @@ const App = (function () {
       changed = true;
     }
 
+    // Step 3: add Pipeline phase tasks to all active projects
+    if (!state.migrationVersion || state.migrationVersion < 3) {
+      for (const prog of state.programs) {
+        for (const proj of prog.projects) {
+          if (proj.archived) continue;
+          if (proj.tasks.some(t => t.phase === 'Pipeline')) continue;
+          const signId = genId('t');
+          const reId   = genId('t');
+          proj.tasks.unshift(
+            { id: signId, name: 'Sign Franchisee Agreement', phase: 'Pipeline', duration: 1,
+              assignee: '', status: 'not_started', actualStart: null, actualEnd: null,
+              dependencies: [], plannedStart: null, plannedEnd: null },
+            { id: reId,   name: 'Real Estate Search',        phase: 'Pipeline', duration: 30,
+              assignee: '', status: 'not_started', actualStart: null, actualEnd: null,
+              dependencies: [{ taskId: signId, type: 'FS', lag: 0 }],
+              plannedStart: null, plannedEnd: null }
+          );
+          if (!Array.isArray(proj.phases)) proj.phases = [];
+          if (!proj.phases.includes('Pipeline')) proj.phases.unshift('Pipeline');
+          const intro = proj.tasks.find(t => t.name === 'Intro call to client');
+          if (intro) {
+            if (!Array.isArray(intro.dependencies)) intro.dependencies = [];
+            intro.dependencies.push({ taskId: reId, type: 'FS', lag: 0 });
+          }
+        }
+      }
+      state.migrationVersion = 3;
+      changed = true;
+    }
+
     for (const prog of state.programs) {
       for (const proj of prog.projects) {
-        // Step 0: rename legacy "Pipeline" phase to "Onboarding"
-        for (const t of proj.tasks) {
-          if (t.phase === 'Pipeline') { t.phase = 'Onboarding'; changed = true; }
-        }
-
-        // Step 3: populate proj.phases from existing tasks if missing
+        // Step 4: populate proj.phases from existing tasks if missing
         if (!Array.isArray(proj.phases) || !proj.phases.length) {
           const taskPhases = new Set(proj.tasks.map(t => t.phase).filter(Boolean));
           proj.phases = PHASES.filter(p => taskPhases.has(p));
@@ -275,7 +305,7 @@ const App = (function () {
           if (proj.phases.length) changed = true;
         }
 
-        // Step 4: add actualStart to existing tasks that lack it
+        // Step 5: add actualStart to existing tasks that lack it
         for (const t of proj.tasks) {
           if (!('actualStart' in t)) { t.actualStart = null; changed = true; }
         }
