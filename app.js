@@ -3,10 +3,9 @@
 'use strict';
 
 // ── Phase constants (global — used by checklist.js, gantt.js, summary) ────────
-const PHASES = ['Pipeline', 'Onboarding', 'Due Diligence', 'On Hold', 'Design', 'Permitting', 'Bidding', 'Financing', 'Construction', 'Close Out'];
+const PHASES = ['Onboarding', 'Due Diligence', 'On Hold', 'Design', 'Permitting', 'Bidding', 'Financing', 'Construction', 'Close Out'];
 
 const PHASE_COLORS = {
-  'Pipeline':         { bg: '#ccfbf1', text: '#0f766e' },
   'Onboarding':       { bg: '#dbeafe', text: '#1d4ed8' },
   'Due Diligence':  { bg: '#dcfce7', text: '#15803d' },
   'On Hold':        { bg: '#f1f5f9', text: '#475569' },
@@ -30,10 +29,6 @@ const SUMMARY_COLS = [
 ];
 
 const PHASE_TASKS = {
-  'Pipeline': [
-    { name: 'Sign Franchise Agreement', duration: 1  },
-    { name: 'Real Estate Search',        duration: 30 },
-  ],
   'Onboarding': [
     { name: 'Intro call to client',          duration: 1  },
     { name: 'Set up project',                duration: 2  },
@@ -265,33 +260,24 @@ const App = (function () {
       changed = true;
     }
 
-    // Step 3: add Pipeline phase tasks to all active projects
-    if (!state.migrationVersion || state.migrationVersion < 3) {
+    // Step 3→4 cleanup: remove Pipeline phase tasks (feature reverted)
+    if (!state.migrationVersion || state.migrationVersion < 4) {
       for (const prog of state.programs) {
         for (const proj of prog.projects) {
-          if (proj.archived) continue;
-          if (proj.tasks.some(t => t.phase === 'Pipeline')) continue;
-          const signId = genId('t');
-          const reId   = genId('t');
-          proj.tasks.unshift(
-            { id: signId, name: 'Sign Franchise Agreement', phase: 'Pipeline', duration: 1,
-              assignee: '', status: 'not_started', actualStart: null, actualEnd: null,
-              dependencies: [], plannedStart: null, plannedEnd: null },
-            { id: reId,   name: 'Real Estate Search',        phase: 'Pipeline', duration: 30,
-              assignee: '', status: 'not_started', actualStart: null, actualEnd: null,
-              dependencies: [{ taskId: signId, type: 'FS', lag: 0 }],
-              plannedStart: null, plannedEnd: null }
+          const pipelineIds = new Set(
+            (proj.tasks || []).filter(t => t.phase === 'Pipeline').map(t => t.id)
           );
-          if (!Array.isArray(proj.phases)) proj.phases = [];
-          if (!proj.phases.includes('Pipeline')) proj.phases.unshift('Pipeline');
-          const intro = proj.tasks.find(t => t.name === 'Intro call to client');
-          if (intro) {
-            if (!Array.isArray(intro.dependencies)) intro.dependencies = [];
-            intro.dependencies.push({ taskId: reId, type: 'FS', lag: 0 });
+          if (!pipelineIds.size) continue;
+          proj.tasks = proj.tasks.filter(t => t.phase !== 'Pipeline');
+          if (Array.isArray(proj.phases)) proj.phases = proj.phases.filter(p => p !== 'Pipeline');
+          for (const task of proj.tasks) {
+            if (Array.isArray(task.dependencies))
+              task.dependencies = task.dependencies.filter(d => !pipelineIds.has(d.taskId));
           }
+          changed = true;
         }
       }
-      state.migrationVersion = 3;
+      state.migrationVersion = 4;
       changed = true;
     }
 
