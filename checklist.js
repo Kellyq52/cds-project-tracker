@@ -129,7 +129,7 @@ const Checklist = (function () {
     empty.classList.add('hidden');
 
     const today = CPM.todayIso();
-    const firstOnboardingTask = tasks.find(t => t.phase === 'Onboarding');
+    const firstPipelineTask = tasks.find(t => t.phase === 'Pipeline');
 
     // Group tasks by phase
     const tasksByPhase = {};
@@ -244,7 +244,7 @@ const Checklist = (function () {
           </td>
           <td>${esc(App.getUserName(task.assignee) || '\u2014')}</td>
           <td class="deps-cell">${depHtml}</td>
-          <td class="center">${task === firstOnboardingTask && canEdit
+          <td class="center">${task === firstPipelineTask && canEdit
             ? `<input type="date" class="inline-date start-date-input" value="${startDate || ''}" title="Project start date" onchange="App.setProjectStart(this.value)" onclick="event.stopPropagation()">`
             : fmtDate(task.plannedStart)}</td>
           <td class="center">

@@ -31,7 +31,7 @@ const SUMMARY_COLS = [
 
 const PHASE_TASKS = {
   'Pipeline': [
-    { name: 'Sign Franchisee Agreement', duration: 1  },
+    { name: 'Sign Franchise Agreement', duration: 1  },
     { name: 'Real Estate Search',        duration: 30 },
   ],
   'Onboarding': [
@@ -274,7 +274,7 @@ const App = (function () {
           const signId = genId('t');
           const reId   = genId('t');
           proj.tasks.unshift(
-            { id: signId, name: 'Sign Franchisee Agreement', phase: 'Pipeline', duration: 1,
+            { id: signId, name: 'Sign Franchise Agreement', phase: 'Pipeline', duration: 1,
               assignee: '', status: 'not_started', actualStart: null, actualEnd: null,
               dependencies: [], plannedStart: null, plannedEnd: null },
             { id: reId,   name: 'Real Estate Search',        phase: 'Pipeline', duration: 30,
