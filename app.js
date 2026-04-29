@@ -99,6 +99,7 @@ const App = (function () {
   let summarySort   = { col: 'program', dir: 'asc' };
   let summaryFilter = '';         // '' = all programs, otherwise program id
   let summaryProjectFilter = 'active'; // 'active' = projects with tasks | 'pipeline' = projects with no tasks
+  let myProjectsOnly = false;          // true = show only projects assigned to current user
   let summaryHiddenCols = new Set(); // persisted in localStorage
   let capacityFilter = { pm: '', cm: '', pd: '', program: '' };
   let capacitySort   = { phase: '', dir: 'asc' };
@@ -476,6 +477,7 @@ const App = (function () {
         if (!proj.archived && (Auth.canViewProject(proj.id) || Auth.canViewProgram(prog.id))) {
           if (summaryProjectFilter === 'active'   && (proj.tasks || []).length === 0) continue;
           if (summaryProjectFilter === 'pipeline' && (proj.tasks || []).length  >  0) continue;
+          if (myProjectsOnly && !isMyProject(proj)) continue;
           rows.push({ prog, proj });
         }
       }
@@ -585,6 +587,25 @@ const App = (function () {
     summaryProjectFilter = order[(order.indexOf(summaryProjectFilter) + 1) % order.length];
     renderSidebar();
     if (currentTab === 'summary') renderSummaryView();
+  }
+
+  function isMyProject(proj) {
+    const uid = Auth.current()?.id;
+    if (!uid) return false;
+    if ((proj.tasks || []).some(t => t.assignee === uid)) return true;
+    return Object.values(proj.phaseAssignees || {}).some(v => v === uid);
+  }
+
+  function toggleMyProjects() {
+    myProjectsOnly = !myProjectsOnly;
+    const btn = document.getElementById('btnMyProjects');
+    if (btn) {
+      btn.textContent = myProjectsOnly ? 'My Projects' : 'All Projects';
+      btn.classList.toggle('scope-tab-active', myProjectsOnly);
+    }
+    renderSidebar();
+    if (currentTab === 'summary')  renderSummaryView();
+    if (currentTab === 'capacity') renderCapacityView();
   }
 
   function toggleSummaryColMenu(e) {
@@ -1023,6 +1044,7 @@ const App = (function () {
       const filtered = prog.projects.filter(p =>
         (isArchive ? !!p.archived : !p.archived) &&
         (Auth.canViewProject(p.id) || progVisible) &&
+        (isArchive || !myProjectsOnly || isMyProject(p)) &&
         (isArchive || summaryProjectFilter === 'all' ||
          (summaryProjectFilter === 'active'   && (p.tasks || []).length > 0) ||
          (summaryProjectFilter === 'pipeline' && (p.tasks || []).length === 0))
@@ -2331,7 +2353,7 @@ const App = (function () {
   }
 
   return {
-    init, render, setTab, setView, setProjectStart, setProjectAddress, setProjectName, setProjectNumber, sortSummary, filterSummary, cycleSummaryProjectFilter, toggleSummaryColMenu, toggleSummaryCol, setProjectComment, setActiveProjectComment, filterCapacity, sortCapacity, navigateToProject, setPhaseAssignee,
+    init, render, setTab, setView, setProjectStart, setProjectAddress, setProjectName, setProjectNumber, sortSummary, filterSummary, cycleSummaryProjectFilter, toggleMyProjects, toggleSummaryColMenu, toggleSummaryCol, setProjectComment, setActiveProjectComment, filterCapacity, sortCapacity, navigateToProject, setPhaseAssignee,
     toggleProgram, setActiveProject, addProgram, addProject, deleteProgram,
     openAddTask, openEditTask, closeModal, removePhase, movePhase, openAddPhase, closeAddPhaseModal, savePhase,
     addDepRow: addDepRowPublic, saveTask, deleteTask, moveTask,
