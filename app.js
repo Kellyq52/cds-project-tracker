@@ -455,7 +455,6 @@ const App = (function () {
             ).join('')}
           </select>
         </div>
-        <button class="btn btn-sm btn-active" onclick="App.toggleSummaryPipeline()" title="Switch between active and pipeline projects">${summaryProjectFilter === 'active' ? 'Active' : 'Pipeline'}</button>
         <div class="col-toggle-wrap" id="summaryColToggleWrap">
           <button class="btn btn-sm col-toggle-btn" onclick="App.toggleSummaryColMenu(event)">Columns &#9662;</button>
           <div class="col-menu" id="summaryColMenu">
@@ -581,9 +580,10 @@ const App = (function () {
     renderSummaryView();
   }
 
-  function toggleSummaryPipeline() {
-    summaryProjectFilter = summaryProjectFilter === 'active' ? 'pipeline' : 'active';
-    renderSummaryView();
+  function setSummaryProjectFilter(val) {
+    summaryProjectFilter = val;
+    renderSidebar();
+    if (currentTab === 'summary') renderSummaryView();
   }
 
   function toggleSummaryColMenu(e) {
@@ -1009,12 +1009,22 @@ const App = (function () {
     if (labelEl)   labelEl.textContent = isArchive ? 'Archived' : 'Programs';
     if (addProgEl) addProgEl.classList.toggle('hidden', isArchive);
 
+    // Sync filter button states (hidden on archive tab)
+    const sfGroup = document.getElementById('sidebarFilterGroup');
+    if (sfGroup) sfGroup.classList.toggle('hidden', isArchive);
+    document.getElementById('sfActive')  ?.classList.toggle('active', summaryProjectFilter === 'active');
+    document.getElementById('sfPipeline')?.classList.toggle('active', summaryProjectFilter === 'pipeline');
+    document.getElementById('sfAll')     ?.classList.toggle('active', summaryProjectFilter === 'all');
+
     const today = CPM.todayIso();
     list.innerHTML = [...state.programs].sort((a, b) => a.name.localeCompare(b.name)).map(prog => {
       const progVisible = Auth.canViewProgram(prog.id); // program_manager assigned to this program
       const filtered = prog.projects.filter(p =>
         (isArchive ? !!p.archived : !p.archived) &&
-        (Auth.canViewProject(p.id) || progVisible)
+        (Auth.canViewProject(p.id) || progVisible) &&
+        (isArchive || summaryProjectFilter === 'all' ||
+         (summaryProjectFilter === 'active'   && (p.tasks || []).length > 0) ||
+         (summaryProjectFilter === 'pipeline' && (p.tasks || []).length === 0))
       ).sort((a, b) => a.name.localeCompare(b.name));
       if (!filtered.length && (isArchive || (!Auth.can('addProject') || (!Auth.can('viewAll') && !progVisible)))) return '';
       const isOpen = expanded.has(prog.id);
@@ -2320,7 +2330,7 @@ const App = (function () {
   }
 
   return {
-    init, render, setTab, setView, setProjectStart, setProjectAddress, setProjectName, setProjectNumber, sortSummary, filterSummary, toggleSummaryPipeline, toggleSummaryColMenu, toggleSummaryCol, setProjectComment, setActiveProjectComment, filterCapacity, sortCapacity, navigateToProject, setPhaseAssignee,
+    init, render, setTab, setView, setProjectStart, setProjectAddress, setProjectName, setProjectNumber, sortSummary, filterSummary, setSummaryProjectFilter, toggleSummaryColMenu, toggleSummaryCol, setProjectComment, setActiveProjectComment, filterCapacity, sortCapacity, navigateToProject, setPhaseAssignee,
     toggleProgram, setActiveProject, addProgram, addProject, deleteProgram,
     openAddTask, openEditTask, closeModal, removePhase, movePhase, openAddPhase, closeAddPhaseModal, savePhase,
     addDepRow: addDepRowPublic, saveTask, deleteTask, moveTask,
