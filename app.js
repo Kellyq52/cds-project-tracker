@@ -98,7 +98,7 @@ const App = (function () {
   let currentDivision = 'pm';     // 'pm' | 'pd'
   let summarySort   = { col: 'program', dir: 'asc' };
   let summaryFilter = '';         // '' = all programs, otherwise program id
-  let summaryShowAssigned = false; // when true, only show projects with at least one assigned task
+  let summaryShowPipeline = false; // when true, only show projects with no tasks yet
   let summaryHiddenCols = new Set(); // persisted in localStorage
   let capacityFilter = { pm: '', cm: '', pd: '', program: '' };
   let capacitySort   = { phase: '', dir: 'asc' };
@@ -454,7 +454,7 @@ const App = (function () {
             ).join('')}
           </select>
         </div>
-        <button class="btn btn-sm ${summaryShowAssigned ? 'btn-active' : ''}" onclick="App.toggleSummaryAssigned()" title="Toggle: only show projects with at least one assigned task">Assigned</button>
+        <button class="btn btn-sm ${summaryShowPipeline ? 'btn-active' : ''}" onclick="App.toggleSummaryPipeline()" title="Toggle: only show projects with no tasks yet">Pipeline</button>
         <div class="col-toggle-wrap" id="summaryColToggleWrap">
           <button class="btn btn-sm col-toggle-btn" onclick="App.toggleSummaryColMenu(event)">Columns &#9662;</button>
           <div class="col-menu" id="summaryColMenu">
@@ -474,7 +474,7 @@ const App = (function () {
       if (summaryFilter && prog.id !== summaryFilter) continue;
       for (const proj of prog.projects) {
         if (!proj.archived && (Auth.canViewProject(proj.id) || Auth.canViewProgram(prog.id))) {
-          if (summaryShowAssigned && !(proj.tasks || []).some(t => t.assignee)) continue;
+          if (summaryShowPipeline && (proj.tasks || []).length > 0) continue;
           rows.push({ prog, proj });
         }
       }
@@ -578,8 +578,8 @@ const App = (function () {
     renderSummaryView();
   }
 
-  function toggleSummaryAssigned() {
-    summaryShowAssigned = !summaryShowAssigned;
+  function toggleSummaryPipeline() {
+    summaryShowPipeline = !summaryShowPipeline;
     renderSummaryView();
   }
 
@@ -2305,7 +2305,7 @@ const App = (function () {
   }
 
   return {
-    init, render, setTab, setView, setProjectStart, setProjectAddress, setProjectName, setProjectNumber, sortSummary, filterSummary, toggleSummaryAssigned, toggleSummaryColMenu, toggleSummaryCol, setProjectComment, setActiveProjectComment, filterCapacity, sortCapacity, navigateToProject, setPhaseAssignee,
+    init, render, setTab, setView, setProjectStart, setProjectAddress, setProjectName, setProjectNumber, sortSummary, filterSummary, toggleSummaryPipeline, toggleSummaryColMenu, toggleSummaryCol, setProjectComment, setActiveProjectComment, filterCapacity, sortCapacity, navigateToProject, setPhaseAssignee,
     toggleProgram, setActiveProject, addProgram, addProject, deleteProgram,
     openAddTask, openEditTask, closeModal, removePhase, movePhase, openAddPhase, closeAddPhaseModal, savePhase,
     addDepRow: addDepRowPublic, saveTask, deleteTask, moveTask,
