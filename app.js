@@ -661,6 +661,7 @@ const App = (function () {
     for (const prog of state.programs)
       for (const proj of prog.projects) {
         if (proj.archived) continue;
+        if (!(proj.tasks || []).length) continue;
         if (!Auth.canViewProject(proj.id) && !Auth.canViewProgram(prog.id)) continue;
         if (capacityFilter.program && prog.id !== capacityFilter.program) continue;
         const pa = proj.phaseAssignees || {};
