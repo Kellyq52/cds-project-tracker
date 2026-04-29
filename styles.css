@@ -252,6 +252,8 @@ body {
 .btn-danger        { background: var(--danger); color: #fff; border-color: var(--danger); }
 .btn-danger:hover  { background: #b91c1c; }
 .btn-sm            { padding: 4px 10px; font-size: 13px; }
+.btn-active        { background: var(--primary); color: #fff; border-color: var(--primary); }
+.btn-active:hover  { background: var(--primary-dark); border-color: var(--primary-dark); }
 .btn-edit          { padding: 3px 10px; font-size: 13px; background: transparent; border: 1px solid var(--border); border-radius: 5px; cursor: pointer; color: var(--primary); font-weight: 500; }
 .btn-edit:hover    { background: var(--primary-light); }
 .btn-close         { background: transparent; border: none; font-size: 24px; line-height: 1; color: var(--text-secondary); cursor: pointer; padding: 0 2px; }
