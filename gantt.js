@@ -110,7 +110,9 @@ const Gantt = (function () {
     const rawMinDay = CPM.isoToDay(chartMin);
     const rawMinDow = new Date(CPM.dayToIso(rawMinDay) + 'T12:00:00Z').getUTCDay();
     const minDay    = rawMinDay - (rawMinDow === 0 ? 6 : rawMinDow - 1);
-    const maxDay    = CPM.isoToDay(CPM.addDays(rawMax, 14));
+    const _maxDate  = new Date(today + 'T12:00:00Z');
+    _maxDate.setUTCMonth(_maxDate.getUTCMonth() + 15);
+    const maxDay    = CPM.isoToDay(_maxDate.toISOString().slice(0, 10));
     const totalWeeks = Math.ceil((maxDay - minDay) / 7) + 1;
     const cW        = totalWeeks * WEEK_W;
 
