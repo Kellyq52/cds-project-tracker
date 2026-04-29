@@ -897,27 +897,32 @@ const App = (function () {
     });
     sChartBody += `<g clip-path="url(#capChartClip)">${barsStr}</g>`;
 
-    // ── Assemble: two-column layout ────────────────────────────────────────
+    // ── Assemble: single-scroll layout with sticky label column ────────────
     const lblHdrDiv = document.createElement('div');
-    lblHdrDiv.className = 'cap-hdr-wrap';
+    lblHdrDiv.className = 'cap-lbl-hdr';
     lblHdrDiv.appendChild(mkSvg(LABEL_W, HEADER_H, sLblHdr));
+
+    const chartHdrDiv = document.createElement('div');
+    chartHdrDiv.className = 'cap-chart-hdr-div';
+    chartHdrDiv.appendChild(mkSvg(chartW, HEADER_H, sChartHdr));
+
+    const hdrRow = document.createElement('div');
+    hdrRow.className = 'cap-hdr-row';
+    hdrRow.appendChild(lblHdrDiv);
+    hdrRow.appendChild(chartHdrDiv);
 
     const lblCol = document.createElement('div');
     lblCol.className = 'cap-labels-col';
-    lblCol.appendChild(lblHdrDiv);
     lblCol.appendChild(mkSvg(LABEL_W, bodyH, sLblBody));
-
-    const chartHdrDiv = document.createElement('div');
-    chartHdrDiv.className = 'cap-hdr-wrap';
-    chartHdrDiv.appendChild(mkSvg(chartW, HEADER_H, sChartHdr));
 
     const chartCol = document.createElement('div');
     chartCol.className = 'cap-chart-col';
-    chartCol.appendChild(chartHdrDiv);
     chartCol.appendChild(mkSvg(chartW, bodyH, sChartBody));
 
-    // Sync vertical scroll from chart column → label column
-    chartCol.addEventListener('scroll', () => { lblCol.scrollTop = chartCol.scrollTop; });
+    const bodyRow = document.createElement('div');
+    bodyRow.className = 'cap-body-row';
+    bodyRow.appendChild(lblCol);
+    bodyRow.appendChild(chartCol);
 
     const legendHtml = '<div class="gantt-legend-bar">' +
       PHASES.map(p => {
@@ -943,16 +948,21 @@ const App = (function () {
     legendStrip.style.marginLeft = LABEL_W + 'px';
     legendStrip.innerHTML = legendHtml;
 
-    const colsRow = document.createElement('div');
-    colsRow.className = 'cap-cols-row';
-    colsRow.appendChild(lblCol);
-    colsRow.appendChild(chartCol);
+    const inner = document.createElement('div');
+    inner.className = 'cap-inner';
+    inner.style.minWidth = (LABEL_W + chartW) + 'px';
+    inner.appendChild(hdrRow);
+    inner.appendChild(bodyRow);
+
+    const scrollCont = document.createElement('div');
+    scrollCont.className = 'cap-scroll-container';
+    scrollCont.appendChild(inner);
 
     container.innerHTML = filterBars;
     const wrap = document.createElement('div');
     wrap.className = 'capacity-chart-wrap';
     wrap.appendChild(legendStrip);
-    wrap.appendChild(colsRow);
+    wrap.appendChild(scrollCont);
     container.appendChild(wrap);
   }
 

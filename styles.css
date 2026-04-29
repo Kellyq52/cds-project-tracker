@@ -596,36 +596,67 @@ body {
   padding: 0 8px;
 }
 
-/* Two-column row: labels col + chart col */
-.cap-cols-row {
-  display: flex;
+/* Outer scroll container — scrolls both H and V */
+.cap-scroll-container {
   flex: 1;
-  overflow: hidden;
   min-height: 0;
+  overflow: auto;
 }
 
-/* Left column: project name labels — fixed, synced vertically via JS */
+/* Inner wrapper — min-width set in JS to ensure horizontal scroll */
+.cap-inner {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Sticky header row — sticks to top of scroll container */
+.cap-hdr-row {
+  display: flex;
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  line-height: 0;
+}
+
+/* Corner cell: label header — sticky to both top (via parent) and left */
+.cap-lbl-hdr {
+  flex-shrink: 0;
+  position: sticky;
+  left: 0;
+  z-index: 4;
+  background: #f1f5f9;
+  border-right: 1.5px solid #e2e8f0;
+  line-height: 0;
+}
+
+/* Chart header — right of the label header */
+.cap-chart-hdr-div {
+  line-height: 0;
+}
+
+/* Body row */
+.cap-body-row {
+  display: flex;
+}
+
+/* Left column: project name labels — sticky left */
 .cap-labels-col {
   flex-shrink: 0;
+  position: sticky;
+  left: 0;
+  z-index: 2;
   overflow: hidden;
   background: #f8fafc;
   border-right: 1.5px solid #e2e8f0;
-  z-index: 2;
 }
 
-/* Right column: date chart — scrolls both horizontally and vertically */
+/* Right column: date chart — no overflow, parent handles scrolling */
 .cap-chart-col {
-  flex: 1;
-  overflow: auto;
-  min-width: 0;
+  flex: none;
 }
 
-/* Sticky date-axis header inside each column */
+/* (kept for any legacy references) */
 .cap-hdr-wrap {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  display: block;
   line-height: 0;
 }
 
@@ -1861,9 +1892,11 @@ body[data-role="client"] .task-check { pointer-events: none; }
   /* ── CM Capacity ──────────────────────────────────────────────────────────── */
   #capacityTabContent,
   #capacityView        { flex: none !important; overflow: visible !important; }
-  .capacity-chart-wrap { flex: none !important; overflow: visible !important; box-shadow: none !important; border-radius: 0 !important; }
-  .cap-cols-row        { overflow: visible !important; }
-  .cap-labels-col      { overflow: visible !important; }
-  .cap-chart-col       { overflow: visible !important; }
-  .cap-hdr-wrap        { position: static !important; }
+  .capacity-chart-wrap  { flex: none !important; overflow: visible !important; box-shadow: none !important; border-radius: 0 !important; }
+  .cap-scroll-container { overflow: visible !important; }
+  .cap-inner            { min-width: 0 !important; }
+  .cap-hdr-row          { position: static !important; }
+  .cap-lbl-hdr          { position: static !important; }
+  .cap-labels-col       { position: static !important; overflow: visible !important; }
+  .cap-chart-col        { overflow: visible !important; }
 }
