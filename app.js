@@ -989,7 +989,7 @@ const App = (function () {
       const filtered = prog.projects.filter(p =>
         (isArchive ? !!p.archived : !p.archived) &&
         (Auth.canViewProject(p.id) || progVisible)
-      );
+      ).sort((a, b) => a.name.localeCompare(b.name));
       if (!filtered.length && (isArchive || (!Auth.can('addProject') || (!Auth.can('viewAll') && !progVisible)))) return '';
       const isOpen = expanded.has(prog.id);
       const projHtml = isOpen ? filtered.map(proj => {
