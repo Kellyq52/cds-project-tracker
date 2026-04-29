@@ -456,6 +456,7 @@ const App = (function () {
             ).join('')}
           </select>
         </div>
+        ${summaryFilter ? `<button class="btn btn-sm clear-filters-btn" onclick="App.filterSummary('')">Clear Filter</button>` : ''}
         <div class="col-toggle-wrap" id="summaryColToggleWrap">
           <button class="btn btn-sm col-toggle-btn" onclick="App.toggleSummaryColMenu(event)">Columns &#9662;</button>
           <div class="col-menu" id="summaryColMenu">
@@ -667,6 +668,8 @@ const App = (function () {
     const progOpts = `<option value="">All Programs</option>` +
       visPrograms.map(p => `<option value="${esc(p.id)}" ${capacityFilter.program === p.id ? 'selected' : ''}>${esc(p.name)}</option>`).join('');
 
+    const _anyCapFilter = !!(capacityFilter.pm || capacityFilter.cm || capacityFilter.pd || capacityFilter.program);
+
     // Filter bar HTML (shown regardless of row count)
     const filterBars = `
       <div class="summary-controls">
@@ -677,6 +680,7 @@ const App = (function () {
         ${filterSelect('pm', pmNames, 'All PM')}
         ${filterSelect('cm', cmNames, 'All CM')}
         ${filterSelect('pd', pdNames, 'All PD')}
+        ${_anyCapFilter ? `<button class="btn btn-sm clear-filters-btn" onclick="App.clearCapacityFilters()">Clear All</button>` : ''}
       </div>
 `;
 
@@ -1017,6 +1021,11 @@ const App = (function () {
 
   function filterCapacity(type, val) {
     capacityFilter[type] = val;
+    renderCapacityView();
+  }
+
+  function clearCapacityFilters() {
+    capacityFilter = { pm: '', cm: '', pd: '', program: '' };
     renderCapacityView();
   }
 
@@ -2379,7 +2388,7 @@ const App = (function () {
   }
 
   return {
-    init, render, setTab, setView, setProjectStart, setProjectAddress, setProjectName, setProjectNumber, sortSummary, filterSummary, cycleSummaryProjectFilter, toggleMyProjects, toggleSummaryColMenu, toggleSummaryCol, setProjectComment, setActiveProjectComment, filterCapacity, sortCapacity, navigateToProject, setPhaseAssignee,
+    init, render, setTab, setView, setProjectStart, setProjectAddress, setProjectName, setProjectNumber, sortSummary, filterSummary, cycleSummaryProjectFilter, toggleMyProjects, toggleSummaryColMenu, toggleSummaryCol, setProjectComment, setActiveProjectComment, filterCapacity, clearCapacityFilters, sortCapacity, navigateToProject, setPhaseAssignee,
     toggleProgram, setActiveProject, addProgram, addProject, deleteProgram,
     openAddTask, openEditTask, closeModal, removePhase, movePhase, openAddPhase, closeAddPhaseModal, savePhase,
     addDepRow: addDepRowPublic, saveTask, deleteTask, moveTask,
