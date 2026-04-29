@@ -28,10 +28,10 @@ const Gantt = (function () {
     _initialized = false;
   }
 
-  function barStatus(task) {
+  function barStatus(task, today) {
     if (task.status === 'complete')    return 'complete';
     if (task.status === 'in_progress') return 'in_progress';
-    if (task.plannedEnd && task.plannedEnd < CPM.todayIso()) return 'overdue';
+    if (task.plannedEnd && task.plannedEnd < today) return 'overdue';
     return 'not_started';
   }
 
@@ -60,9 +60,23 @@ const Gantt = (function () {
       _initialized = true;
     }
 
+    const today = CPM.todayIso();
+
+    // O(1) task lookup by id — used for dependency arrows
+    const taskMap = new Map(tasks.map(t => [t.id, t]));
+
+    // Pre-group tasks by phase — used for rollup counts
+    const tasksByPhase = new Map();
+    tasks.forEach(t => {
+      const p = t.phase || '';
+      if (!tasksByPhase.has(p)) tasksByPhase.set(p, []);
+      tasksByPhase.get(p).push(t);
+    });
+
     // ── Build display list ─────────────────────────────────────────────────
     const displayItems = [];
     let currentPhase = null;
+    let taskIndex = 0;
     tasks.forEach(task => {
       const p = task.phase || '';
       if (p !== currentPhase) {
@@ -71,7 +85,7 @@ const Gantt = (function () {
         if (isCollapsed) displayItems.push({ type: 'rollup', phase: p });
         currentPhase = p;
       }
-      if (!collapsedPhases.has(p)) displayItems.push({ type: 'task', task });
+      if (!collapsedPhases.has(p)) displayItems.push({ type: 'task', task, taskIndex: taskIndex++ });
     });
 
     // Y positions (body-relative — no header offset)
@@ -88,7 +102,7 @@ const Gantt = (function () {
 
     // ── Date range ─────────────────────────────────────────────────────────
     const allIso = tasks.flatMap(t => [t.plannedStart, t.plannedEnd]).filter(Boolean);
-    allIso.push(CPM.todayIso());
+    allIso.push(today);
     const rawMin    = allIso.reduce((a, b) => a < b ? a : b);
     const rawMax    = allIso.reduce((a, b) => a > b ? a : b);
     const rawMinDay = CPM.isoToDay(CPM.addDays(rawMin, -7));
@@ -98,8 +112,7 @@ const Gantt = (function () {
     const totalWeeks = Math.ceil((maxDay - minDay) / 7) + 1;
     const cW        = totalWeeks * WEEK_W;
 
-    const todayDayNum = Math.floor(Date.now() / 86400000);
-    const todayX      = (todayDayNum - minDay) * DAY_W;
+    const todayX = (CPM.isoToDay(today) - minDay) * DAY_W;
 
     const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     const taskItems = displayItems.filter(i => i.type === 'task');
@@ -173,7 +186,7 @@ const Gantt = (function () {
       if (item.type === 'rollup') {
         const midY   = item.y + ROW_H / 2;
         const colors = PHASE_COLORS[item.phase] || { bg: '#e2e8f0', text: '#475569' };
-        const pt     = tasks.filter(t => t.phase === item.phase);
+        const pt     = tasksByPhase.get(item.phase) || [];
         const done   = pt.filter(t => t.status === 'complete').length;
         sLabels += `<text x="10" y="${midY - 4}" class="g-label-name" fill="${colors.text}"
           clip-path="url(#lblClip)">${esc(item.phase)}</text>`;
@@ -224,8 +237,7 @@ const Gantt = (function () {
         sChart += `<text x="6" y="${item.y + PHASE_H / 2 + 5}" class="g-phase-chart-label"
           fill="${colors.text}" pointer-events="none">${esc(item.name)}</text>`;
       } else if (item.type === 'task') {
-        const ti = taskItems.indexOf(item);
-        if (ti % 2 === 1)
+        if (item.taskIndex % 2 === 1)
           sChart += `<rect x="0" y="${item.y}" width="${cW}" height="${ROW_H}" fill="#fafbfc"/>`;
         sChart += `<line x1="0" y1="${item.y + ROW_H}" x2="${cW}" y2="${item.y + ROW_H}" stroke="#f0f2f5" stroke-width="1"/>`;
       } else if (item.type === 'rollup') {
@@ -253,7 +265,7 @@ const Gantt = (function () {
       const sMidY = taskYMid.get(task.id);
       task.dependencies.forEach(dep => {
         if (!visibleTaskIds.has(dep.taskId)) return;
-        const pred = tasks.find(t => t.id === dep.taskId);
+        const pred = taskMap.get(dep.taskId);
         if (!pred || !pred.plannedStart) return;
         const pMidY = taskYMid.get(pred.id);
         if (pMidY === undefined) return;
@@ -305,7 +317,7 @@ const Gantt = (function () {
       const barX  = (CPM.isoToDay(task.plannedStart) - minDay) * DAY_W + 3;
       const barW  = Math.max((CPM.isoToDay(task.plannedEnd) - CPM.isoToDay(task.plannedStart) + 1) * DAY_W - 6, 6);
       const barY  = item.y + BAR_PAD_Y;
-      const color = BAR_COLORS[barStatus(task)];
+      const color = BAR_COLORS[barStatus(task, today)];
       sChart += `<rect x="${barX}" y="${barY}" width="${barW}" height="${BAR_H}" rx="4"
               fill="${color}" class="g-bar" data-id="${task.id}" style="cursor:pointer">
               <title>${esc(task.name)} | ${task.plannedStart} \u2192 ${task.plannedEnd} | ${task.duration}d${task.assignee ? ' | ' + App.getUserName(task.assignee) : ''}</title></rect>`;

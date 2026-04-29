@@ -371,16 +371,17 @@ const App = (function () {
     else warn.classList.add('hidden');
   }
 
-  // Run CPM for every project (for summary view date calculations)
+  // Run CPM for every active (non-archived) project
   function computeAll() {
     for (const prog of state.programs)
       for (const proj of prog.projects)
-        CPM.compute(proj.tasks, proj.startDate);
+        if (!proj.archived) CPM.compute(proj.tasks, proj.startDate);
   }
 
-  // Get start/end dates and status for a phase within a project's tasks
-  function getPhaseDates(tasks, phase) {
-    const today = CPM.todayIso();
+  // Get start/end dates and status for a phase within a project's tasks.
+  // Accepts an optional pre-computed today string to avoid repeated Date.now() calls.
+  function getPhaseDates(tasks, phase, today) {
+    if (!today) today = CPM.todayIso();
     let start = null, end = null, total = 0, complete = 0, overdue = false, inProg = false;
     for (const t of tasks) {
       if (t.phase !== phase || !t.plannedStart) continue;
@@ -481,9 +482,11 @@ const App = (function () {
       }
     }
 
+    const today = CPM.todayIso();
+
     // Pre-compute all phase dates once per project — reused for both sorting and rendering.
     const phaseDateCache = new Map(rows.map(({ proj }) =>
-      [proj.id, new Map(PHASES.map(p => [p, getPhaseDates(proj.tasks, p)]))]
+      [proj.id, new Map(PHASES.map(p => [p, getPhaseDates(proj.tasks, p, today)]))]
     ));
 
     const sortKey = ({ prog, proj }) => {
@@ -522,7 +525,6 @@ const App = (function () {
 
     const tbody = rows.map(({ prog, proj }) => {
       const rowPD  = phaseDateCache.get(proj.id);
-      const today  = CPM.todayIso();
       let total = 0, complete = 0, overdue = 0;
       for (const t of proj.tasks) {
         total++;
@@ -689,10 +691,12 @@ const App = (function () {
       return;
     }
 
+    const today = CPM.todayIso();
+
     // Pre-compute phase dates for all rows (reused for date range + bar rendering)
     const pdCache = new Map(rows.map(({ proj }) => {
       const m = {};
-      for (const phase of PHASES) m[phase] = getPhaseDates(proj.tasks, phase);
+      for (const phase of PHASES) m[phase] = getPhaseDates(proj.tasks, phase, today);
       return [proj.id, m];
     }));
 

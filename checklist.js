@@ -131,6 +131,19 @@ const Checklist = (function () {
     const today = CPM.todayIso();
     const firstOnboardingTask = tasks.find(t => t.phase === 'Onboarding');
 
+    // Pre-compute which users belong to each assignable phase role — used in phase headers
+    const PHASE_ROLE = { 'Due Diligence': 'project_manager', 'Permitting': 'property_developer', 'Construction': 'construction_manager', 'Design': 'consultant' };
+    const allUsers = App.getUsers() || [];
+    const phaseRoleUsers = {};
+    if (canEdit) {
+      for (const [phase, role] of Object.entries(PHASE_ROLE)) {
+        phaseRoleUsers[phase] = allUsers.filter(u => {
+          const roles = Array.isArray(u.roles) ? u.roles : [u.role].filter(Boolean);
+          return roles.includes(role);
+        });
+      }
+    }
+
     // Group tasks by phase
     const tasksByPhase = {};
     tasks.forEach(task => {
@@ -173,13 +186,8 @@ const Checklist = (function () {
             ${phaseDurStr}
           </td>
           <td style="background:${colors.bg}; color:${colors.text}; padding:4px 8px;">
-            ${ canEdit && ['Due Diligence','Permitting','Construction','Design'].includes(phase) ? (() => {
-              const PHASE_ROLE = { 'Due Diligence': 'project_manager', 'Permitting': 'property_developer', 'Construction': 'construction_manager', 'Design': 'consultant' };
-              const allowedRole = PHASE_ROLE[phase];
-              const roleUsers = (App.getUsers() || []).filter(u => {
-                const roles = Array.isArray(u.roles) ? u.roles : [u.role].filter(Boolean);
-                return roles.includes(allowedRole);
-              });
+            ${ canEdit && phaseRoleUsers[phase] ? (() => {
+              const roleUsers = phaseRoleUsers[phase];
               return `
             <select class="phase-assignee-select"
               onchange="App.setPhaseAssignee('${esc(phase)}', this.value)"
