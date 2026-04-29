@@ -394,7 +394,7 @@ body {
 .g-month      { font: 600 12px -apple-system, sans-serif; fill: #374151; }
 .g-day        { font: 10px -apple-system, sans-serif; fill: #9ca3af; }
 .g-label-hdr  { font: 600 12px -apple-system, sans-serif; fill: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
-.g-label-name { font: 500 14px -apple-system, sans-serif; }
+.g-label-name { font: 500 11px -apple-system, sans-serif; }
 .g-label-sub  { font: 12px -apple-system, sans-serif; fill: #9ca3af; }
 .g-today-label { font: 10px -apple-system, sans-serif; fill: #ef4444; }
 .g-bar-label  { font: 600 11px -apple-system, sans-serif; fill: #fff; }
@@ -679,7 +679,7 @@ body {
 
 /* SVG text classes for capacity chart */
 .cap-bar-label  { font: 600 10px -apple-system, sans-serif; }
-.cap-meta-label { font: 10px -apple-system, sans-serif; fill: #94a3b8; }
+.cap-meta-label { font: 9px -apple-system, sans-serif; fill: #94a3b8; }
 .cap-proj-link  { fill: #2563eb; cursor: pointer; }
 .cap-proj-link:hover { fill: #1d4ed8; }
 

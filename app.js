@@ -754,7 +754,7 @@ const App = (function () {
     // Layout
     const LABEL_W  = 260;
     const HEADER_H = 48;
-    const ROW_H    = 44;
+    const ROW_H    = 32;
     const BAR_H    = 18;
     const BAR_PAD  = (ROW_H - BAR_H) / 2;
     const WEEK_W   = 20;                        // px per week — increase to widen
