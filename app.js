@@ -588,6 +588,20 @@ const App = (function () {
     if (currentTab === 'summary') renderSummaryView();
   }
 
+  // Earliest plannedStart across all active projects, minus one month
+  function _globalGanttMinDate() {
+    let min = null;
+    for (const prog of state.programs)
+      for (const proj of prog.projects)
+        if (!proj.archived)
+          for (const t of (proj.tasks || []))
+            if (t.plannedStart && (!min || t.plannedStart < min)) min = t.plannedStart;
+    if (!min) return null;
+    const d = new Date(min + 'T12:00:00Z');
+    d.setUTCMonth(d.getUTCMonth() - 1);
+    return d.toISOString().slice(0, 10);
+  }
+
   function isMyProject(proj, prog) {
     const uid = Auth.current()?.id;
     if (!uid) return false;
@@ -1945,7 +1959,7 @@ const App = (function () {
         : '<p>No tasks yet &mdash; click <strong>+ Add Phase</strong> to add a phase, or click <strong>Templates</strong> to pre-load all standard phases.</p>';
     }
     if (currentView === 'checklist') Checklist.render(tasks, map, proj ? (proj.phaseAssignees || {}) : {}, proj ? proj.startDate : '', phases);
-    else Gantt.render(tasks, proj ? proj.startDate : CPM.todayIso(), 'ganttWrapper');
+    else Gantt.render(tasks, proj ? proj.startDate : CPM.todayIso(), 'ganttWrapper', _globalGanttMinDate());
   }
 
   function setView(view) {
