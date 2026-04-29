@@ -715,10 +715,10 @@ const App = (function () {
       return a.proj.name.localeCompare(b.proj.name);
     });
 
-    // Date range: 18 months before today through 18 months ahead
+    // Date range: 12 months before today through 18 months ahead
     const todayDay  = CPM.isoToDay(today);
     const [ty, tm, td] = today.split('-').map(Number);
-    const minDay    = CPM.isoToDay(new Date(Date.UTC(ty, tm - 1 - 18, td)).toISOString().slice(0, 10));
+    const minDay    = CPM.isoToDay(new Date(Date.UTC(ty, tm - 1 - 12, td)).toISOString().slice(0, 10));
     const maxDay    = CPM.isoToDay(new Date(Date.UTC(ty, tm - 1 + 18, td)).toISOString().slice(0, 10));
     const totalDays = maxDay - minDay + 1;
 
