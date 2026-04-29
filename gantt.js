@@ -44,7 +44,7 @@ const Gantt = (function () {
     return el;
   }
 
-  function render(tasks, projectStartDate, wrapperId, globalMinIso) {
+  function render(tasks, projectStartDate, wrapperId) {
     const wrapper = document.getElementById(wrapperId);
 
     if (!tasks.length) {
@@ -106,13 +106,10 @@ const Gantt = (function () {
     allIso.push(today);
     const rawMin    = allIso.reduce((a, b) => a < b ? a : b);
     const rawMax    = allIso.reduce((a, b) => a > b ? a : b);
-    const chartMin  = globalMinIso || CPM.addDays(rawMin, -7);
-    const rawMinDay = CPM.isoToDay(chartMin);
+    const rawMinDay = CPM.isoToDay(CPM.addDays(rawMin, -7));
     const rawMinDow = new Date(CPM.dayToIso(rawMinDay) + 'T12:00:00Z').getUTCDay();
     const minDay    = rawMinDay - (rawMinDow === 0 ? 6 : rawMinDow - 1);
-    const _maxDate  = new Date(today + 'T12:00:00Z');
-    _maxDate.setUTCMonth(_maxDate.getUTCMonth() + 15);
-    const maxDay    = CPM.isoToDay(_maxDate.toISOString().slice(0, 10));
+    const maxDay    = CPM.isoToDay(CPM.addDays(rawMax, 14));
     const totalWeeks = Math.ceil((maxDay - minDay) / 7) + 1;
     const cW        = totalWeeks * WEEK_W;
 
