@@ -737,14 +737,12 @@ const App = (function () {
       return a.proj.name.localeCompare(b.proj.name);
     });
 
-    // Date range: earliest active project date −1 month → today +15 months
+    // Date range: earliest task date across displayed rows −1 month → today +15 months
     const todayDay  = CPM.isoToDay(today);
     let _capMin = null;
-    for (const _pg of state.programs)
-      for (const _pj of _pg.projects)
-        if (!_pj.archived)
-          for (const _t of (_pj.tasks || []))
-            if (_t.plannedStart && (!_capMin || _t.plannedStart < _capMin)) _capMin = _t.plannedStart;
+    for (const { proj } of rows)
+      for (const _t of (proj.tasks || []))
+        if (_t.plannedStart && (!_capMin || _t.plannedStart < _capMin)) _capMin = _t.plannedStart;
     const _minBase = new Date((_capMin || today) + 'T12:00:00Z');
     _minBase.setUTCMonth(_minBase.getUTCMonth() - 1);
     const minDay  = CPM.isoToDay(_minBase.toISOString().slice(0, 10));
