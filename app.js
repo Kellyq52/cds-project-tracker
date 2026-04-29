@@ -729,8 +729,8 @@ const App = (function () {
     const ROW_H    = 44;
     const BAR_H    = 18;
     const BAR_PAD  = (ROW_H - BAR_H) / 2;
-    const WEEK_W   = 30;                        // px per week — increase to widen
-    const DAY_W    = WEEK_W / 7;               // ≈ 4.3 px/day
+    const WEEK_W   = 20;                        // px per week — increase to widen
+    const DAY_W    = WEEK_W / 7;               // ≈ 2.9 px/day
     const svgW  = LABEL_W + totalDays * DAY_W;
     const bodyH = rows.length * ROW_H;
 
