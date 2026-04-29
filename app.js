@@ -1010,6 +1010,9 @@ const App = (function () {
     wrap.appendChild(legendStrip);
     wrap.appendChild(scrollCont);
     container.appendChild(wrap);
+
+    // Scroll so today appears ~250px from the left edge of the chart area
+    scrollCont.scrollLeft = Math.max(0, todayX - 250);
   }
 
   function filterCapacity(type, val) {
