@@ -716,8 +716,8 @@ const App = (function () {
     });
 
     // Date range: today through today + 15 months
-    const todayDay  = CPM.isoToDay(CPM.todayIso());
-    const [ty, tm, td] = CPM.todayIso().split('-').map(Number);
+    const todayDay  = CPM.isoToDay(today);
+    const [ty, tm, td] = today.split('-').map(Number);
     const maxDay    = CPM.isoToDay(new Date(Date.UTC(ty, tm - 1 + 15, td)).toISOString().slice(0, 10));
     // Position today at ~10% from the left edge
     const minDay    = Math.round(todayDay - (maxDay - todayDay) / 9);
@@ -729,8 +729,8 @@ const App = (function () {
     const ROW_H    = 44;
     const BAR_H    = 18;
     const BAR_PAD  = (ROW_H - BAR_H) / 2;
-    // Fit ~14 months in the available width; scroll if project span is longer
-    const DAY_W    = Math.max(2, Math.floor((container.offsetWidth - LABEL_W) / 426));
+    const WEEK_W   = 42;          // px per week — increase to widen
+    const DAY_W    = WEEK_W / 7;  // = 6 px/day
     const svgW  = LABEL_W + totalDays * DAY_W;
     const bodyH = rows.length * ROW_H;
 
