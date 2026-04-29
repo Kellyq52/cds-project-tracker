@@ -921,9 +921,11 @@ const App = (function () {
         const barX   = startD * DAY_W;
         const barW   = Math.max((endD - startD + 1) * DAY_W, 4);
         const labelX = Math.max(barX + 6, Math.min(barX + barW - 6, labelXMap.get(phase)));
+        const clipId = `bc_${i}_${phase.replace(/\W/g, '_')}`;
+        barsStr += `<clipPath id="${clipId}"><rect x="${barX + 1}" y="${barY}" width="${Math.max(barW - 2, 0)}" height="${BAR_H}"/></clipPath>`;
         barsStr += `<text x="${labelX}" y="${labelY}"
                class="cap-bar-label" text-anchor="middle" fill="${colors.text}" pointer-events="none"
-               >${esc(PHASE_LABELS[phase])}</text>`;
+               clip-path="url(#${clipId})">${esc(PHASE_LABELS[phase])}</text>`;
       });
     });
     sChartBody += `<g clip-path="url(#capChartClip)">${barsStr}</g>`;
