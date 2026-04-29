@@ -474,10 +474,9 @@ const App = (function () {
     for (const prog of state.programs) {
       if (summaryFilter && prog.id !== summaryFilter) continue;
       for (const proj of prog.projects) {
-        if (!proj.archived && (Auth.canViewProject(proj.id) || Auth.canViewProgram(prog.id))) {
+        if (!proj.archived && (myProjectsOnly ? isMyProject(proj) : true)) {
           if (summaryProjectFilter === 'active'   && (proj.tasks || []).length === 0) continue;
           if (summaryProjectFilter === 'pipeline' && (proj.tasks || []).length  >  0) continue;
-          if (myProjectsOnly && !isMyProject(proj)) continue;
           rows.push({ prog, proj });
         }
       }
@@ -1043,13 +1042,13 @@ const App = (function () {
       const progVisible = Auth.canViewProgram(prog.id); // program_manager assigned to this program
       const filtered = prog.projects.filter(p =>
         (isArchive ? !!p.archived : !p.archived) &&
-        (Auth.canViewProject(p.id) || progVisible) &&
-        (isArchive || !myProjectsOnly || isMyProject(p)) &&
+        (isArchive ? (Auth.canViewProject(p.id) || progVisible) : (!myProjectsOnly || isMyProject(p))) &&
         (isArchive || summaryProjectFilter === 'all' ||
          (summaryProjectFilter === 'active'   && (p.tasks || []).length > 0) ||
          (summaryProjectFilter === 'pipeline' && (p.tasks || []).length === 0))
       ).sort((a, b) => a.name.localeCompare(b.name));
-      if (!filtered.length && (isArchive || (!Auth.can('addProject') || (!Auth.can('viewAll') && !progVisible)))) return '';
+      const canAddHere = !isArchive && Auth.can('addProject') && (Auth.can('viewAll') || progVisible || Auth.can('addProgram'));
+      if (!filtered.length && (isArchive || !canAddHere)) return '';
       const isOpen = expanded.has(prog.id);
       const projHtml = isOpen ? filtered.map(proj => {
         const isActive = proj.id === activeId;
@@ -1069,7 +1068,6 @@ const App = (function () {
         </div>`;
       }).join('') : '';
       // Add-project btn: visible when user can add AND is scoped to this program (or has global access)
-      const canAddHere = !isArchive && Auth.can('addProject') && (Auth.can('viewAll') || progVisible || Auth.can('addProgram'));
       const addBtn = canAddHere ? `<button class="prog-add-btn" onclick="event.stopPropagation();App.addProject('${prog.id}')" title="Add project">+</button>` : '';
       // Delete-program btn: only users with addProgram permission (admin, user)
       const delBtn = (!isArchive && Auth.can('addProgram')) ? `<button class="prog-del-btn" onclick="event.stopPropagation();App.deleteProgram('${prog.id}')" title="Delete program">&times;</button>` : '';
