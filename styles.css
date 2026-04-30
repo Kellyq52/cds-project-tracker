@@ -1830,8 +1830,7 @@ body[data-role="consultant"] .proj-action-group,
 body[data-role="consultant"] #addTaskBtn,
 body[data-role="consultant"] #addPhaseBtn,
 body[data-role="consultant"] #loadTemplateBtn,
-body[data-role="consultant"] .phase-remove-btn,
-body[data-role="consultant"] #tabCapacity   { display: none !important; }
+body[data-role="consultant"] .phase-remove-btn { display: none !important; }
 
 /* Client: read-only — hide all mutation controls */
 body[data-role="client"] #tabSummary,
