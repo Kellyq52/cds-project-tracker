@@ -779,6 +779,13 @@ body {
   white-space: nowrap;
 }
 
+.summary-proj-count {
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  margin-left: 6px;
+}
+
 .col-menu {
   display: none;
   position: absolute;

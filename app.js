@@ -445,6 +445,18 @@ const App = (function () {
       .filter(p => p.projects.some(pr => !pr.archived && (Auth.canViewProject(pr.id) || Auth.canViewProgram(p.id))))
       .slice().sort((a, b) => a.name.localeCompare(b.name));
 
+    let _summaryProjCount = 0;
+    for (const _p of state.programs) {
+      if (summaryFilter && _p.id !== summaryFilter) continue;
+      for (const _pr of _p.projects) {
+        if (!_pr.archived && (myProjectsOnly ? isMyProject(_pr, _p) : true)) {
+          if (summaryProjectFilter === 'active'   && (_pr.tasks || []).length === 0) continue;
+          if (summaryProjectFilter === 'pipeline' && (_pr.tasks || []).length  >  0) continue;
+          _summaryProjCount++;
+        }
+      }
+    }
+
     const filterBar = `
       <div class="summary-controls">
         <div class="summary-filter-wrap">
@@ -459,6 +471,7 @@ const App = (function () {
         ${summaryFilter ? `<button class="btn btn-sm clear-filters-btn" onclick="App.filterSummary('')">Clear Filter</button>` : ''}
         <div class="col-toggle-wrap" id="summaryColToggleWrap">
           <button class="btn btn-sm col-toggle-btn" onclick="App.toggleSummaryColMenu(event)">Columns &#9662;</button>
+          <span class="summary-proj-count">${_summaryProjCount} project${_summaryProjCount === 1 ? '' : 's'}</span>
           <div class="col-menu" id="summaryColMenu">
             ${SUMMARY_COLS.map(c => `
               <label class="col-menu-item">
