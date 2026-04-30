@@ -273,6 +273,8 @@ body {
 .btn-active:hover  { background: var(--primary-dark); border-color: var(--primary-dark); }
 .btn-edit          { padding: 3px 10px; font-size: 13px; background: transparent; border: 1px solid var(--border); border-radius: 5px; cursor: pointer; color: var(--primary); font-weight: 500; }
 .btn-edit:hover    { background: var(--primary-light); }
+.btn-view-toggle   { width: 76px; justify-content: center; background: #f1f5f9; border-color: #94a3b8; color: #475569; }
+.btn-view-toggle:hover { background: #e2e8f0; border-color: #64748b; color: #334155; }
 .btn-close         { background: transparent; border: none; font-size: 24px; line-height: 1; color: var(--text-secondary); cursor: pointer; padding: 0 2px; }
 .btn-close:hover   { color: var(--text); }
 .btn-remove        { background: transparent; border: none; font-size: 22px; line-height: 1; color: var(--text-muted); cursor: pointer; padding: 0 4px; }
