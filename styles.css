@@ -1897,7 +1897,8 @@ body[data-role="client"] .task-check { pointer-events: none; }
   /* ── Layout ───────────────────────────────────────────────────────────────── */
   .app-layout        { display: block !important; height: auto !important; overflow: visible !important; }
   .main-content      { display: block !important; overflow: visible !important; width: 100% !important; }
-  #projectTabContent { display: block !important; height: auto !important; }
+  body[data-tab="project"] #projectTabContent,
+  body[data-tab="archive"] #projectTabContent { display: block !important; height: auto !important; }
   #summaryTabContent,
   #capacityTabContent { padding: 0 !important; }
   .pm-sticky-header  { position: static !important; box-shadow: none !important; }

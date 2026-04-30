@@ -333,6 +333,7 @@ const App = (function () {
   // ── Tab switching ──────────────────────────────────────────────────────────
   function setTab(tab) {
     currentTab = tab;
+    document.body.dataset.tab = tab;
     const isProjectLike = tab === 'project' || tab === 'archive';
     document.getElementById('tabProject').classList.toggle('active', tab === 'project');
     document.getElementById('tabSummary').classList.toggle('active', tab === 'summary');
@@ -1676,6 +1677,7 @@ const App = (function () {
         }
       }
     }
+    document.body.dataset.tab = currentTab;
     // On fresh login, default PM team members to the Program Summary tab
     if (fromLogin) {
       const user = Auth.current();
