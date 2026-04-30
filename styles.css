@@ -278,10 +278,6 @@ body {
 .btn-remove        { background: transparent; border: none; font-size: 22px; line-height: 1; color: var(--text-muted); cursor: pointer; padding: 0 4px; }
 .btn-remove:hover  { color: var(--danger); }
 
-/* ── View Toggle ────────────────────────────────────────────────────────────── */
-.view-toggle { display: flex; background: rgba(255,255,255,0.1); border-radius: 8px; padding: 3px; gap: 2px; }
-.toggle-btn  { background: transparent; border: none; color: rgba(255,255,255,0.55); padding: 4px 14px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.15s; }
-.toggle-btn.active { background: rgba(255,255,255,0.18); color: #fff; }
 
 /* ── Task counts / progress / actions (all in sticky name row) ───────────────── */
 .pm-task-counts    { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }

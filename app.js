@@ -343,7 +343,7 @@ const App = (function () {
     document.getElementById('capacityTabContent').classList.toggle('hidden', tab !== 'capacity');
     // Show view toggle and task controls on both project and archive tabs
     const canEdit = Auth.can('editTasks');
-    document.getElementById('viewToggleGroup').classList.toggle('hidden', !isProjectLike);
+    document.getElementById('btnViewToggle').classList.toggle('hidden', !isProjectLike);
     document.getElementById('addTaskBtn').classList.toggle('hidden', !isProjectLike || !canEdit);
     document.getElementById('addPhaseBtn').classList.toggle('hidden', !isProjectLike || !canEdit);
     document.getElementById('loadTemplateBtn').classList.toggle('hidden', !isProjectLike || !canEdit);
@@ -1988,9 +1988,13 @@ const App = (function () {
     currentView = view;
     document.getElementById('checklistView').classList.toggle('hidden', view !== 'checklist');
     document.getElementById('ganttView').classList.toggle('hidden', view !== 'gantt');
-    document.getElementById('btnChecklist').classList.toggle('active', view === 'checklist');
-    document.getElementById('btnGantt').classList.toggle('active', view === 'gantt');
+    const btn = document.getElementById('btnViewToggle');
+    if (btn) btn.textContent = view === 'checklist' ? 'Gantt' : 'Checklist';
     render();
+  }
+
+  function toggleView() {
+    setView(currentView === 'checklist' ? 'gantt' : 'checklist');
   }
 
   // ── Task actions ───────────────────────────────────────────────────────────
@@ -2388,7 +2392,7 @@ const App = (function () {
   }
 
   return {
-    init, render, setTab, setView, setProjectStart, setProjectAddress, setProjectName, setProjectNumber, sortSummary, filterSummary, cycleSummaryProjectFilter, toggleMyProjects, toggleSummaryColMenu, toggleSummaryCol, setProjectComment, setActiveProjectComment, filterCapacity, clearCapacityFilters, sortCapacity, navigateToProject, setPhaseAssignee,
+    init, render, setTab, setView, toggleView, setProjectStart, setProjectAddress, setProjectName, setProjectNumber, sortSummary, filterSummary, cycleSummaryProjectFilter, toggleMyProjects, toggleSummaryColMenu, toggleSummaryCol, setProjectComment, setActiveProjectComment, filterCapacity, clearCapacityFilters, sortCapacity, navigateToProject, setPhaseAssignee,
     toggleProgram, setActiveProject, addProgram, addProject, deleteProgram,
     openAddTask, openEditTask, closeModal, removePhase, movePhase, openAddPhase, closeAddPhaseModal, savePhase,
     addDepRow: addDepRowPublic, saveTask, deleteTask, moveTask,

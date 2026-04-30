@@ -51,10 +51,6 @@
 
 
     <div class="header-actions pm-only">
-      <div id="viewToggleGroup" class="view-toggle">
-        <button id="btnChecklist" class="toggle-btn active" onclick="App.setView('checklist')">Checklist</button>
-        <button id="btnGantt"     class="toggle-btn"        onclick="App.setView('gantt')">Gantt</button>
-      </div>
       <button id="btnRestoreProject" class="btn btn-ghost btn-sm hidden" onclick="App.restoreCurrentProject()">&#8626; Restore</button>
       <button class="btn btn-ghost btn-sm" onclick="App.exportJSON()">&#8595; Export</button>
       <button class="btn btn-ghost btn-sm" onclick="App.importJSON()">&#8593; Import</button>
@@ -136,6 +132,7 @@
             </div>
             <div class="sum-actions">
               <button id="addTaskBtn"      class="btn btn-primary btn-sm" onclick="App.openAddTask()">+ Add Task</button>
+              <button id="btnViewToggle"   class="btn btn-sm"             onclick="App.toggleView()">Gantt</button>
               <button id="addPhaseBtn"     class="btn btn-sm"             onclick="App.openAddPhase()">+ Add Phase</button>
               <button id="loadTemplateBtn" class="btn btn-sm"             onclick="App.openTemplateModal()" title="Load or manage project templates">Templates</button>
             </div>
