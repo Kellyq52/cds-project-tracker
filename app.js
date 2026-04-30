@@ -690,7 +690,7 @@ const App = (function () {
       for (const proj of prog.projects) {
         if (proj.archived) continue;
         if (!(proj.tasks || []).length) continue;
-        if (!Auth.canViewProject(proj.id) && !Auth.canViewProgram(prog.id)) continue;
+        if (myProjectsOnly && !Auth.canViewProject(proj.id) && !Auth.canViewProgram(prog.id)) continue;
         if (capacityFilter.program && prog.id !== capacityFilter.program) continue;
         const pa = proj.phaseAssignees || {};
         // Person filters: OR within the same person (show all their projects across roles),
