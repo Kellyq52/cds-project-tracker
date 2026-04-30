@@ -1020,6 +1020,7 @@ const App = (function () {
 
     const scrollCont = document.createElement('div');
     scrollCont.className = 'cap-scroll-container';
+    scrollCont.dataset.rowH = ROW_H;
     scrollCont.appendChild(inner);
 
     container.innerHTML = filterBars;
@@ -1385,13 +1386,15 @@ const App = (function () {
       document.title = proj.name + (currentView === 'gantt' ? ' Gantt' : ' Checklist');
     }
 
-    // For Gantt: swap in a real <thead>/<tbody> table so the header repeats on every page
+    // For Gantt / Capacity: swap in a real <thead>/<tbody> table so the header repeats on every page
     const ganttCleanup = (currentView === 'gantt') ? _buildGanttPrintTable() : null;
+    const capCleanup   = (currentTab === 'capacity') ? _buildCapacityPrintTable() : null;
 
     // Register BEFORE window.print() — Chrome fires afterprint synchronously during print()
     window.addEventListener('afterprint', function restore() {
       document.title = originalTitle;
       if (ganttCleanup) ganttCleanup();
+      if (capCleanup)   capCleanup();
       window.removeEventListener('afterprint', restore);
     });
 
@@ -1484,6 +1487,75 @@ const App = (function () {
     wrapper.appendChild(container);
 
     return () => { container.remove(); wrapper.insertBefore(inner, wrapper.firstChild); };
+  }
+
+  function _buildCapacityPrintTable() {
+    const view = document.getElementById('capacityView');
+    if (!view) return null;
+    const scrollCont = view.querySelector('.cap-scroll-container');
+    const inner      = scrollCont && scrollCont.querySelector('.cap-inner');
+    if (!inner) return null;
+
+    const hdrRow  = inner.querySelector('.cap-hdr-row');
+    const bodyRow = inner.querySelector('.cap-body-row');
+    if (!hdrRow || !bodyRow) return null;
+
+    const lblHdrSvg    = hdrRow.querySelector('.cap-lbl-hdr svg');
+    const chartHdrSvg  = hdrRow.querySelector('.cap-chart-hdr-div svg');
+    const lblBodySvg   = bodyRow.querySelector('.cap-labels-col svg');
+    const chartBodySvg = bodyRow.querySelector('.cap-chart-col svg');
+    if (!lblHdrSvg || !chartHdrSvg || !lblBodySvg || !chartBodySvg) return null;
+
+    const LABEL_W  = parseInt(lblHdrSvg.getAttribute('width'));
+    const HEADER_H = parseInt(lblHdrSvg.getAttribute('height'));
+    const chartW   = parseInt(chartHdrSvg.getAttribute('width'));
+    const bodyH    = parseInt(lblBodySvg.getAttribute('height'));
+    const ROW_H    = parseInt(scrollCont.dataset.rowH) || 32;
+    const rowCount = Math.round(bodyH / ROW_H);
+
+    const lblInner   = lblBodySvg.innerHTML;
+    const chartInner = chartBodySvg.innerHTML;
+
+    const tbl = document.createElement('table');
+    tbl.className = 'cap-print-table';
+
+    // thead — repeats on every printed page
+    const thead = tbl.createTHead();
+    const hdrTr = thead.insertRow();
+    const lblHdrTd = hdrTr.insertCell();
+    lblHdrTd.appendChild(lblHdrSvg.cloneNode(true));
+    const chartHdrTd = hdrTr.insertCell();
+    chartHdrTd.appendChild(chartHdrSvg.cloneNode(true));
+
+    // tbody — one <tr> per project row, viewBox clips the shared SVG content
+    const tbody = tbl.createTBody();
+    const ns = 'http://www.w3.org/2000/svg';
+    for (let i = 0; i < rowCount; i++) {
+      const tr = tbody.insertRow();
+      tr.style.pageBreakInside = 'avoid';
+
+      const mkCell = (w, h, content) => {
+        const svg = document.createElementNS(ns, 'svg');
+        svg.setAttribute('width',   w);
+        svg.setAttribute('height',  h);
+        svg.setAttribute('viewBox', `0 ${i * ROW_H} ${w} ${ROW_H}`);
+        svg.innerHTML = content;
+        const td = tr.insertCell();
+        td.appendChild(svg);
+        return td;
+      };
+      mkCell(LABEL_W, ROW_H, lblInner);
+      mkCell(chartW,  ROW_H, chartInner);
+    }
+
+    const container = document.createElement('div');
+    container.id = 'cap-print-container';
+    container.appendChild(tbl);
+
+    inner.style.display = 'none';
+    scrollCont.appendChild(container);
+
+    return () => { container.remove(); inner.style.display = ''; };
   }
 
   function exportJSON() {

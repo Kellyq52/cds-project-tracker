@@ -1948,4 +1948,9 @@ body[data-role="client"] .task-check { pointer-events: none; }
   .cap-lbl-hdr          { position: static !important; }
   .cap-labels-col       { position: static !important; overflow: visible !important; }
   .cap-chart-col        { overflow: visible !important; }
+  #cap-print-container            { display: block; }
+  .cap-print-table                { border-collapse: collapse; }
+  .cap-print-table td             { padding: 0; vertical-align: top; line-height: 0; }
+  .cap-print-table thead          { display: table-header-group; }
+  .cap-print-table tbody tr       { page-break-inside: avoid; }
 }
