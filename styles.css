@@ -780,8 +780,15 @@ body {
 }
 
 .summary-proj-count {
+  display: inline-flex;
+  align-items: center;
   font-size: 12px;
-  color: var(--text-muted);
+  font-weight: 600;
+  color: var(--primary);
+  background: var(--primary-light);
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+  padding: 2px 9px;
   white-space: nowrap;
   margin-left: 6px;
 }
