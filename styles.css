@@ -1939,11 +1939,11 @@ body[data-role="client"] .task-check { pointer-events: none; }
   .pc-notstarted    { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
   /* ── CM Capacity ──────────────────────────────────────────────────────────── */
-  #capacityTabContent,
-  #capacityView        { flex: none !important; overflow: visible !important; }
-  .capacity-chart-wrap  { flex: none !important; overflow: visible !important; box-shadow: none !important; border-radius: 0 !important; }
-  .cap-scroll-container { overflow: visible !important; }
-  .cap-inner            { min-width: 0 !important; }
+  #capacityTabContent   { height: auto !important; overflow: visible !important; }
+  #capacityView         { flex: none !important; height: auto !important; overflow: visible !important; }
+  .capacity-chart-wrap  { flex: none !important; height: auto !important; overflow: visible !important; box-shadow: none !important; border-radius: 0 !important; }
+  .cap-scroll-container { flex: none !important; height: auto !important; overflow: visible !important; }
+  .cap-inner            { height: auto !important; }
   .cap-hdr-row          { position: static !important; }
   .cap-lbl-hdr          { position: static !important; }
   .cap-labels-col       { position: static !important; overflow: visible !important; }
