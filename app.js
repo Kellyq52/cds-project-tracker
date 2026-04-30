@@ -468,7 +468,6 @@ const App = (function () {
             ).join('')}
           </select>
         </div>
-        ${summaryFilter ? `<button class="btn btn-sm clear-filters-btn" onclick="App.filterSummary('')">Clear Filter</button>` : ''}
         <div class="col-toggle-wrap" id="summaryColToggleWrap">
           <button class="btn btn-sm col-toggle-btn" onclick="App.toggleSummaryColMenu(event)">Columns &#9662;</button>
           <span class="summary-proj-count">${_summaryProjCount} project${_summaryProjCount === 1 ? '' : 's'}</span>
@@ -481,6 +480,7 @@ const App = (function () {
               </label>`).join('')}
           </div>
         </div>
+        ${summaryFilter ? `<button class="btn btn-sm clear-filters-btn" onclick="App.filterSummary('')">Clear Filter</button>` : ''}
       </div>`;
 
     // Build sortable rows (apply program filter + assigned filter)
